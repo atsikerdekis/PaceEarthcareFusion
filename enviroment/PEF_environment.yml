@@ -1,0 +1,27 @@
+name: PEF
+channels:
+  - conda-forge
+dependencies:
+  - r-base
+  - r-data.table
+  - r-dplyr
+  - r-fields
+  - r-ggplot2
+  - r-hydrogof
+  - r-mapdata
+  - r-mapproj
+  - r-maps
+  - r-maptools
+  - r-ncdf4
+  - r-oce
+  - r-ocedata
+  - r-rmisc
+  - r-sf
+  - r-sp
+  - nco
+  - libnetcdf
+  - r-magick
+  - wget
+  - ca-certificates
+  - openssl
+prefix: /usr/people/tsikerde/miniforge3/envs/PEF

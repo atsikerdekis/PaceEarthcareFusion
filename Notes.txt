@@ -1,0 +1,53 @@
+### Aerosol Layer Height
+alh:long_name = "Aerosol layer height" ; # Available also in fine, coarse, mode1, mode2, mode3
+aerosol_layer_base; aerosol_layer_top; # Available optical thickness, backscatter extinction of aerosol layer
+
+###
+lidar_ratio:long_name = "Diagnostic aerosol lidar ratio" ;
+aerosol_layer_mean_lidar_ratio_355nm
+
+###
+A-LAY_A-ALD_PDD_v10.0   : A-ALD containing information on aerosol layers in cloud-free ATLID observations
+A-PRO_A-AER_PDD_V10.2   : ATLID Aerosol Inversion (A- AER) product.
+A-PRO_A-EBD_PDD_V10.2   : ATLID-Extinction Backscatter and Depolarization (A-EBD) product
+ACM-CAP_PDD             : cloud, aerosol and precipitation properties estimated from the synergy of radar, lidar and imager
+AM-COL_AM-ACD_PDD_v10.0 : aerosol columnar properties under cloud-free conditions
+M-AOT_PDD_v10.0         : M-AOT containing aerosol optical thickness over land and ocean.
+
+### Acronyms for EarthCARE sensors
+A    : ATLID
+C    : CPR
+M    : MSI
+AC   : ATLID-CPR
+ACM  : ATLID-CPR-MSI
+ACMB : ATLID-CPR-MSI-BBR
+
+### Acronyms for EarthCARE products
+CLD : Cloud Precipitation
+CAP : Cloud Aerosols Precipitation
+EDB : Extinction Backscatter Depolarization
+COP : Cloud Optical Properties
+AOT : Aerosol Optical Thickness
+AER : Aerosol Inversion
+ALD : Aerosol Layer Descriptor
+PRO : Profiles
+COL : Column
+FM  : Feature Mask
+
+
+### AOD from EarthCARE
+M-AOT   (670nm, 865nm) # aerosol_optical_thickness_670nm, aerosol_optical_thickness_865nm
+A-AER   (355nm)        # particle_extinction_coefficient_355nm
+A-EDB   (355nm)        # particle_extinction_coefficient_355nm
+A-ALD   (355nm)        # aerosol_optical_thickness_355nm, Column aerosol optical thickness at 355 nm
+ACM-CAP (355nm)        # aerosol_optical_depth
+
+### AE from EarthCARE
+M-AOT # angstrom_parameter_670nm_865nm (Only over ocean...)
+M-AOT # angstrom_parameter_355nm_670nm (Only over ocean...)
+
+### PACE SPEXone wavelengths
+# wave_optic_prop = 340, 355, 380, 440, 490, 500, 532, 550, 565, 670, 675, 765, 865, 870, 1020, 1064, 1600, 2000
+
+### EarthCARE
+A equator night E equator daytime
