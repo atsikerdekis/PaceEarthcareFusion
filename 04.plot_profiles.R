@@ -19,7 +19,7 @@ filter_half_column  <- FALSE
 plot_version         <- "FilterWarmCloudColumn_FilterSupercooledCloudColumn_IncludeNAT" # String for plot versioning e.g. "filter_cloud_columns_applied"... a mouthful but you get the point
 
 ### CREATE PLOT DATE
-dir.create( paste0(path_plot,gsub("-","",mydate)), showWarnings=F)
+dir.create( paste0(path_plot,gsub("-","",mydate)), showWarnings=F, recursive = TRUE)
 
 ############
 ### PLOT ###

@@ -1,17 +1,13 @@
-# 📌 PaceEarthcareFusion (PEF)
+# 🛰️ PaceEarthcareFusion (PEF)
 
 PEF reads, collocates, and plots EarthCARE and PACE data.
 
----
 ## 📥 Download Test Data
----
 
 Test data can be downloaded from:  
-🔗 [Your Link Here]
+🔗 https://surfdrive.surf.nl/files/index.php/s/VysQvaLkdjzwFop
 
----
 ## 🛠 Installation
----
 
 1. Install Miniforge3:  
    https://github.com/conda-forge/miniforge
@@ -22,24 +18,14 @@ Test data can be downloaded from:
 3. Activate the environment:  
    `mamba activate PEF`
 
----
 ## ⚙️ Configuration
----
 
 Modify the following paths before running the code:  
 - `00.start.R` → See variables under section `INPUT` and variable `path_code`
 - `01.init.R`  → See all `path_*` variables 
 
----
 ## ▶️ Running PEF
----
 
-Run the script with:  
-$ Rscript 00.start.R YYYYMMDD  
+Run the script:  
+$ Rscript 00.start.R 
 
-Example:  
-$ Rscript 00.start.R 20241201  
-
----
-🚀 Happy coding!
----
