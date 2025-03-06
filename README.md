@@ -7,10 +7,10 @@ PEF reads, collocates, and plots EarthCARE and PACE data.
 Test data can be downloaded from:  
 🔗 https://surfdrive.surf.nl/files/index.php/s/VysQvaLkdjzwFop
 
-## 🛠 Installation
+## 🛠 Environment
 
 1. Install Miniforge3:  
-   https://github.com/conda-forge/miniforge
+   🔗 https://github.com/conda-forge/miniforge
 
 2. Create the environment using mamba:  
    `mamba env create -f environment/PEF_environment.yml`
@@ -27,5 +27,5 @@ Modify the following paths before running the code:
 ## ▶️ Running PEF
 
 Run the script:  
-$ Rscript 00.start.R 
+`Rscript 00.start.R` 
 
