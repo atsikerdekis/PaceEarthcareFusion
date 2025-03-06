@@ -1,3 +1,9 @@
+### GIT notes standard procedure for changes
+git status
+git add .
+git commit -m "Description of what you have changed"
+git push origin main
+
 ### Aerosol Layer Height
 alh:long_name = "Aerosol layer height" ; # Available also in fine, coarse, mode1, mode2, mode3
 aerosol_layer_base; aerosol_layer_top; # Available optical thickness, backscatter extinction of aerosol layer
