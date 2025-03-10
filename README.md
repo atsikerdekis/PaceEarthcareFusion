@@ -1,7 +1,8 @@
 <p align="center">
-  🛰️ <strong>PaceEarthcareFusion (PEF)</strong> 🛰️
-  <img src="assets/PEF_logo3.png" alt="PEF Logo" width="200" height="200">
+  <img src="assets/PEF_logo3.png" alt="PEF Logo" width="150" height="150">
 </p>
+
+# 🛰️ PaceEarthcareFusion (PEF) 🛰️
 
 PEF reads, collocates, and plots EarthCARE and PACE data.
 
