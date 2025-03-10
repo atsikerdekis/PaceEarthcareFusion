@@ -3,7 +3,7 @@
 
 This software was developed for collocating and comparing aerosol and cloud data from PACE (SPEXone) and EarthCARE (ATLID). If you use this software in a research publication, please consider citing it appropriately.
 
-## Attribution
+## 📜 Attribution
 
 - Code attribution: [PACE EarthCARE Fusion (PEF)](https://github.com/atsikerdekis/PaceEarthcareFusion)
 - Data attribution for EarthCARE (ATLID): [van Zadelhoff et al. (2023)](https://doi.org/10.5194/amt-16-3631-2023) and [Donovan et al. (2024)](https://doi.org/10.5194/amt-17-5301-2024)
