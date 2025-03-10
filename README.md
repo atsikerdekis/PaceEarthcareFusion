@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/PEF_logo3.webp" alt="PEF Logo" width="300" height="300">
+  <img src="assets/PEF_logo3.png" alt="PEF Logo" width="300" height="300">
 </p>
 
 # 🛰️ PaceEarthcareFusion (PEF)
