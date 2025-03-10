@@ -2,6 +2,9 @@
 
 PEF reads, collocates, and plots EarthCARE and PACE data.
 
+![PEF Logo](assets/PEF_logo3.png)
+*Logo generated using ChatGPT-4, DALL·E and GIMP.*
+
 ## 📥 Download Test Data
 
 Test data can be downloaded from:  
