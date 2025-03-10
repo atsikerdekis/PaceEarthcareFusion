@@ -1,9 +1,10 @@
+<p align="center">
+  <img src="assets/logo.webp" alt="PEF Logo" width="300" height="300">
+</p>
+
 # 🛰️ PaceEarthcareFusion (PEF)
 
 PEF reads, collocates, and plots EarthCARE and PACE data.
-
-![PEF Logo](assets/PEF_logo3.png)
-*Logo generated using ChatGPT-4, DALL·E and GIMP.*
 
 ## 📥 Download Test Data
 
