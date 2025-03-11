@@ -1,6 +1,9 @@
 <p align="center"> <img src="assets/PEF_logo3.png" alt="PEF Logo" width="150" height="150"> </p>
 <h1 align="center"> 🛰️  PACE EarthCARE Fusion (PEF) 🛰️ </h1>
-This software was developed for collocating and comparing aerosol and cloud data from PACE (SPEXone) and EarthCARE (ATLID). If you use this software in a research publication, please cite it appropriately.
+This software was developed by Athanasios Tsikerdekis (KNMI) for collocating and comparing aerosol and cloud data from PACE (SPEXone) and EarthCARE (ATLID). 
+The work was Funded by ESA through the [AIRSENSE](https://www.grasp-earth.com/portfolio/airsense/) project. 
+PACE data were provided by [SRON](https://www.sron.nl/) and EarthCARE data were provided by [KNMI](https://www.knmi.nl). 
+If you use this software in a research publication, please cite it appropriately.
 
 ## 📜 Attribution
 
