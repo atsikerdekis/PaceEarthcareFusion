@@ -2,7 +2,7 @@
 ### INPUT ###
 #############
 #path_out <- "/Users/tsikerde/Workspace/AIRSENSE/data/PACE/SPEXone-L2-DL20241125" # Laptop
-path_out <- "/nobackup/users/tsikerde/AIRSENSE/PACE/SPEXone-L2-DL20250127"       # KNMI desktop
+path_out <- "/nobackup/users/tsikerde/AIRSENSE/PEF/PACE/SPEXone-L2-DL20250127"       # KNMI desktop
 
 #################
 ### ARGUMENTS ###

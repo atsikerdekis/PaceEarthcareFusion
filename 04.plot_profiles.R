@@ -128,6 +128,9 @@ for (p in loop_product) {
       ### ATLID select ALL (not only the collocated points) within this MIN and MAX area
       atlid_PROF_plot_lon <- atlid_geodata_sel[[p]]$lon[ID]
       atlid_PROF_plot_lat <- atlid_geodata_sel[[p]]$lat[ID]
+      atlid_PROF_plot_ID  <- atlid_geodata_sel[[p]]$atlid_ID[ID]
+      atlid_geodata_sel[[p]]$orbit_ID[ID]
+      atlid_geodata_sel[[p]]$atlid_ID[ID]
       atlid_PROF_x <- atlid_PROF_plot_lon
       #atlid_PROF_y <- rev(apply(atlid_vardata_sel[[p]]$`ScienceData/height`[ID,],2,mean))/1000 # 2D
       atlid_PROF_y <- atlid_vardata_sel[[p]]$`ScienceData/height`[ID,]/1000 # 3D
@@ -149,9 +152,9 @@ for (p in loop_product) {
         # TC=13 (Smoke)
         # TC=14 (Dust Smoke)
         # TC=15  (Dusty Mix)
-        # TC=25
-        # TC=26
-        # TC=27
+        # TC=25 (Stratospheric Ash)
+        # TC=26 (Stratospheric Sulphate)
+        # TC=27 (Stratospheric Smoke)
         # TC=101
         # TC=102
         # TV=104
@@ -295,10 +298,59 @@ for (p in loop_product) {
       if ( grepl("particle_extinction_coefficient", atlid_varname[[p]][v]) ) {
         # ATLID AOD calculated from ATLID extinction
         ATLID_AOD_from_EXT <- rowSums(atlid_PROF_z,na.rm=T)
+        
+        ###
+        ### FILTERS AOD
+        ###
         ATLID_AOD_from_EXT[which(ATLID_AOD_from_EXT==0)]=NA
         ATLID_AOD_from_EXT[which(is.na(spex_plot_z1))]=NA
         spex_plot_z1[which(is.na(ATLID_AOD_from_EXT))]=NA
-        
+	atlid_PROF_z[which(is.na(spex_plot_z1)),]=NA
+	
+	###
+	### FILTER AOD OUTLIERS: Several rules...
+	###
+        # (1) ATLID AOD > ATLID mean AOD of the scene * 4
+        ID_AOD_outlier1 <- which(ATLID_AOD_from_EXT >  mean(ATLID_AOD_from_EXT,na.rm=T)*4)
+        # (2) ATLID AOD > ATLID mean AOD of the scene * 3.5 and 1 pixel-distance from liquid clouds (Warm or Supercooled)
+        ID_AOD_outlier2 <- which(ATLID_AOD_from_EXT >  mean(ATLID_AOD_from_EXT,na.rm=T)*3.5)
+        ID_AOD_outlier2_CloudDistance <- which(apply(atlid_TC_classification, 1, function(row) any(row %in% c(1, 2))))       # Check which ATLID profiles are Liquid Clouds (Warm or SuperCooled)
+        CloseToCloudsID <- sapply(ID_AOD_outlier2, function(x) any(abs(x - ID_AOD_outlier2_CloudDistance) <= 1))             # Create a logical vector indicating if each value in Vector1 is close to any in Vector2
+        if (length(CloseToCloudsID)>=1) {ID_AOD_outlier2 <- ID_AOD_outlier2[CloseToCloudsID]} else {ID_AOD_outlier2 <- NULL} # Keep only the values that are close to clouds
+        # (3) ATLID AOD > ATLID mean AOD of the scene * 3.0 and 2 pixel-distance from liquid clouds (Warm or Supercooled)
+        ID_AOD_outlier3 <- which(ATLID_AOD_from_EXT >  mean(ATLID_AOD_from_EXT,na.rm=T)*3.0)
+        ID_AOD_outlier3_CloudDistance <- which(apply(atlid_TC_classification, 1, function(row) any(row %in% c(1, 2)))) # Check which ATLID profiles are Liquid Clouds (Warm or SuperCooled)
+        CloseToCloudsID <- sapply(ID_AOD_outlier3, function(x) any(abs(x - ID_AOD_outlier3_CloudDistance) <= 2))       # Create a logical vector indicating if each value in Vector1 is close to any in Vector2
+        if (length(CloseToCloudsID)>=1) {ID_AOD_outlier3 <- ID_AOD_outlier3[CloseToCloudsID]} else {ID_AOD_outlier3 <- NULL} # Keep only the values that are close to clouds
+        # (4) ATLID AOD > ATLID mean AOD of the scene * 2.5 and 3 pixel-distance from liquid clouds (Warm or Supercooled)
+        ID_AOD_outlier4 <- which(ATLID_AOD_from_EXT >  mean(ATLID_AOD_from_EXT,na.rm=T)*2.5)
+        ID_AOD_outlier4_CloudDistance <- which(apply(atlid_TC_classification, 1, function(row) any(row %in% c(1, 2)))) # Check which ATLID profiles are Liquid Clouds (Warm or SuperCooled)
+        CloseToCloudsID <- sapply(ID_AOD_outlier4, function(x) any(abs(x - ID_AOD_outlier4_CloudDistance) <= 3))       # Create a logical vector indicating if each value in Vector1 is close to any in Vector2
+        if (length(CloseToCloudsID)>=1) {ID_AOD_outlier4 <- ID_AOD_outlier4[CloseToCloudsID]} else {ID_AOD_outlier4 <- NULL} # Keep only the values that are close to clouds
+        # (5) ATLID AOD > ATLID mean AOD of the scene * 2.0 and 4 pixel-distance from liquid clouds (Warm or Supercooled)
+        ID_AOD_outlier5 <- which(ATLID_AOD_from_EXT >  mean(ATLID_AOD_from_EXT,na.rm=T)*2.0)
+        ID_AOD_outlier5_CloudDistance <- which(apply(atlid_TC_classification, 1, function(row) any(row %in% c(1, 2)))) # Check which ATLID profiles are Liquid Clouds (Warm or SuperCooled)
+        CloseToCloudsID <- sapply(ID_AOD_outlier5, function(x) any(abs(x - ID_AOD_outlier5_CloudDistance) <= 4))       # Create a logical vector indicating if each value in Vector1 is close to any in Vector2
+        if (length(CloseToCloudsID)>=1) {ID_AOD_outlier5 <- ID_AOD_outlier5[CloseToCloudsID]} else {ID_AOD_outlier5 <- NULL} # Keep only the values that are close to clouds
+        # Exlude cases that belong to another category with order
+        ID_AOD_outlier2 <- setdiff(ID_AOD_outlier2, ID_AOD_outlier1)
+        ID_AOD_outlier3 <- setdiff(ID_AOD_outlier3, c(ID_AOD_outlier1, ID_AOD_outlier2))
+        ID_AOD_outlier4 <- setdiff(ID_AOD_outlier4, c(ID_AOD_outlier1, ID_AOD_outlier2, ID_AOD_outlier3))
+        ID_AOD_outlier5 <- setdiff(ID_AOD_outlier5, c(ID_AOD_outlier1, ID_AOD_outlier2, ID_AOD_outlier3, ID_AOD_outlier4))
+        # Clean and save vectors for ploting
+        ATLID_AOD_from_EXT_outliers1 <- ATLID_AOD_from_EXT
+        ATLID_AOD_from_EXT_outliers2 <- ATLID_AOD_from_EXT
+        ATLID_AOD_from_EXT_outliers3 <- ATLID_AOD_from_EXT
+        ATLID_AOD_from_EXT_outliers4 <- ATLID_AOD_from_EXT
+        ATLID_AOD_from_EXT_outliers5 <- ATLID_AOD_from_EXT
+        if (length(ID_AOD_outlier1)>=1) {ATLID_AOD_from_EXT_outliers1[-ID_AOD_outlier1]=NA} else {ATLID_AOD_from_EXT_outliers1[]=NA}
+        if (length(ID_AOD_outlier2)>=1) {ATLID_AOD_from_EXT_outliers2[-ID_AOD_outlier2]=NA} else {ATLID_AOD_from_EXT_outliers2[]=NA}
+        if (length(ID_AOD_outlier3)>=1) {ATLID_AOD_from_EXT_outliers3[-ID_AOD_outlier3]=NA} else {ATLID_AOD_from_EXT_outliers3[]=NA}
+        if (length(ID_AOD_outlier4)>=1) {ATLID_AOD_from_EXT_outliers4[-ID_AOD_outlier4]=NA} else {ATLID_AOD_from_EXT_outliers4[]=NA}
+        if (length(ID_AOD_outlier5)>=1) {ATLID_AOD_from_EXT_outliers5[-ID_AOD_outlier5]=NA} else {ATLID_AOD_from_EXT_outliers5[]=NA}
+	ATLID_AOD_from_EXT_outliers <- c(ATLID_AOD_from_EXT_outliers1, ATLID_AOD_from_EXT_outliers2, ATLID_AOD_from_EXT_outliers3, ATLID_AOD_from_EXT_outliers4, ATLID_AOD_from_EXT_outliers5) # Just for use in ymax
+        ATLID_AOD_from_EXT[c(ID_AOD_outlier1,ID_AOD_outlier2,ID_AOD_outlier3,ID_AOD_outlier4,ID_AOD_outlier5)]=NA
+
         plot_data <- data.table(spex_AOD355 = spex_plot_z1,
                                 atlid_AOD355 = ATLID_AOD_from_EXT,
                                 spex_origID2 = spex_plot_origID2,
@@ -318,7 +370,7 @@ for (p in loop_product) {
           ymax <- max(c(plot_data$spex_AOD355, plot_data$atlid_AOD355),na.rm=T)
           myplot <- ScatterPLOT3(dataX=plot_data$spex_AOD355, dataY=plot_data$atlid_AOD355, titleX=bquote(SPEXone~AOD[355]), titleY=bquote(ATLID~AOD[355]), smin=0, smax=ymax+ymax*0.1, psize=4)
           ggsave(plot=myplot, width=5, height=5, dpi=dpi,
-                 filename=paste0(path_plot,gsub("-","",mydate),"/PROFILE_Case",sprintf("%02d",s),"_",atlid_product[p],"_",gsub(" ","",gsub("\n","",atlid_vartitle[[p]][v])),"_DIST",dist,"_TDIF",tdif,"_",mydate,"_",plot_version,".png"))
+                 filename=paste0(path_plot,gsub("-","",mydate),"/PROFILE_Case_",atlid_version,"_",sprintf("%02d",s),"_",atlid_product[p],"_",gsub(" ","",gsub("\n","",atlid_vartitle[[p]][v])),"_DIST",dist,"_TDIF",tdif,"_",mydate,"_",plot_version,".png"))
         }
       }
       
@@ -329,7 +381,7 @@ for (p in loop_product) {
       ### PLOT PROFILE PLOTS ###
       ##########################
       dpi <- 300
-      png(filename=paste0(path_plot,gsub("-","",mydate),"/Case",sprintf("%02d",s),"_",atlid_product[p],"_",gsub(" ","",gsub("\n","",atlid_vartitle[[p]][v])),"_DIST",dist,"_TDIF",tdif,"_",mydate,"_",plot_version,".png"), width=6.0*dpi+0.3*dpi+1*dpi, height=0.5*dpi+3*dpi)
+      png(filename=paste0(path_plot,gsub("-","",mydate),"/Case_",atlid_version,"_",sprintf("%02d",s),"_",atlid_product[p],"_",gsub(" ","",gsub("\n","",atlid_vartitle[[p]][v])),"_DIST",dist,"_TDIF",tdif,"_",mydate,"_",plot_version,".png"), width=6.0*dpi+0.3*dpi+1*dpi, height=0.5*dpi+3*dpi)
       #myl <- layout(mat=matrix(c(1:3,4,2,3,5:7),3,3, byrow=T), widths=c(6.0,0.3,1), heights=c(0.5,0.5,3)) # FOR AE timeseries
       myl <- layout(mat=matrix(c(1:6),2,3, byrow=T), widths=c(6.0,0.3,1), heights=c(1,3))
       layout.show(myl)
@@ -338,27 +390,35 @@ for (p in loop_product) {
       par(mai=c(0.0,0.9,0.0,0.5), family="Century Gothic")
       if ( grepl("particle_extinction_coefficient", atlid_varname[[p]][v]) ) { 
         if (all(is.na(spex_plot_z1))==FALSE) {
-          ymax <- max(c(spex_plot_z1,ATLID_AOD_from_EXT),na.rm=T)+0.1*max(c(spex_plot_z1,ATLID_AOD_from_EXT),na.rm=T)
-          plot(atlid_PROF_x,spex_plot_z1, lwd=2, xaxt='n', yaxt='n', bty='n', ann=FALSE, ylim=c(0,ymax), col="red", pch=19)
+          ymax <- max(c(spex_plot_z1,ATLID_AOD_from_EXT,ATLID_AOD_from_EXT_outliers),na.rm=T)+0.1*max(c(spex_plot_z1,ATLID_AOD_from_EXT,ATLID_AOD_from_EXT_outliers),na.rm=T)
+          diff_x1 <- atlid_PROF_x[1]-diff(atlid_PROF_x)[1]/2
+          diff_x2 <- atlid_PROF_x[length(atlid_PROF_x)]+diff(atlid_PROF_x)[length(atlid_PROF_x)-1]/2
+          plot(c(diff_x1,atlid_PROF_x,diff_x2),c(NA,spex_plot_z1,NA), lwd=2, xaxt='n', yaxt='n', bty='n', ann=FALSE, ylim=c(0,ymax), col="red", pch=19)
           axis(2, seq(0,100,round(ymax/5,2)), las=1, cex.axis=1.5)
           abline(h=seq(0,100,round(ymax/5,2)), lwd=0.5, col="grey")
           title(ylab=bquote(SPEXone~AOD[355]), line=4, cex.lab=1.8)
           ID       <- which(is.na(spex_plot_z1))
-          split_ID <- which(abs(diff(ID)) > 1)
-          if (length(ID)!=0 & length(split_ID)==0) {
-            polygon(x=c(min(atlid_PROF_x[ID]),min(atlid_PROF_x[ID]),max(atlid_PROF_x[ID]),max(atlid_PROF_x[ID]),min(atlid_PROF_x[ID])), y=c(-10,10,10,-10,-10), density=10, border=F, angle=45, lwd=0.2)
-            polygon(x=c(min(atlid_PROF_x[ID]),min(atlid_PROF_x[ID]),max(atlid_PROF_x[ID]),max(atlid_PROF_x[ID]),min(atlid_PROF_x[ID])), y=c(-10,10,10,-10,-10), density=10, border=F, angle=135, lwd=0.2)
-          }
-          if (length(ID)!=0 & length(split_ID)>=1) {
-            IDs <- c(ID[1], ID[split_ID+1])
-            IDe <- c(ID[split_ID], ID[length(ID)])
-            for (n in 1:length(IDs)) {
-              polygon(x=c(atlid_PROF_x[IDs[n]],atlid_PROF_x[IDs[n]],atlid_PROF_x[IDe[n]],atlid_PROF_x[IDe[n]],atlid_PROF_x[IDs[n]]), y=c(-10,10,10,-10,-10), density=10, border=F, angle=45, lwd=0.2)
-              polygon(x=c(atlid_PROF_x[IDs[n]],atlid_PROF_x[IDs[n]],atlid_PROF_x[IDe[n]],atlid_PROF_x[IDe[n]],atlid_PROF_x[IDs[n]]), y=c(-10,10,10,-10,-10), density=10, border=F, angle=135, lwd=0.2)
-            }
-          }
+          #split_ID <- which(abs(diff(ID)) > 1)
+          #if (length(ID)!=0 & length(split_ID)==0) {
+          #  polygon(x=c(min(atlid_PROF_x[ID]),min(atlid_PROF_x[ID]),max(atlid_PROF_x[ID]),max(atlid_PROF_x[ID]),min(atlid_PROF_x[ID])), y=c(-10,10,10,-10,-10), density=10, border=F, angle=45, lwd=0.2)
+          #  polygon(x=c(min(atlid_PROF_x[ID]),min(atlid_PROF_x[ID]),max(atlid_PROF_x[ID]),max(atlid_PROF_x[ID]),min(atlid_PROF_x[ID])), y=c(-10,10,10,-10,-10), density=10, border=F, angle=135, lwd=0.2)
+          #}
+          #if (length(ID)!=0 & length(split_ID)>=1) {
+          #  IDs <- c(ID[1], ID[split_ID+1])
+          #  IDe <- c(ID[split_ID], ID[length(ID)])
+          #  for (n in 1:length(IDs)) {
+          #    polygon(x=c(atlid_PROF_x[IDs[n]],atlid_PROF_x[IDs[n]],atlid_PROF_x[IDe[n]],atlid_PROF_x[IDe[n]],atlid_PROF_x[IDs[n]]), y=c(-10,10,10,-10,-10), density=10, border=F, angle=45, lwd=0.2)
+          #    polygon(x=c(atlid_PROF_x[IDs[n]],atlid_PROF_x[IDs[n]],atlid_PROF_x[IDe[n]],atlid_PROF_x[IDe[n]],atlid_PROF_x[IDs[n]]), y=c(-10,10,10,-10,-10), density=10, border=F, angle=135, lwd=0.2)
+          #  }
+          #}
+	  abline(v=atlid_PROF_x[ID], col="grey95", lwd=3.5)
           ### Plot ATLID AOD
           points(atlid_PROF_x,ATLID_AOD_from_EXT, col="blue", pch=19)
+	  points(atlid_PROF_x,ATLID_AOD_from_EXT_outliers1, col="blue", pch=as.character(1), cex=2)
+          points(atlid_PROF_x,ATLID_AOD_from_EXT_outliers2, col="blue", pch=as.character(2), cex=2)
+          points(atlid_PROF_x,ATLID_AOD_from_EXT_outliers3, col="blue", pch=as.character(3), cex=2)
+          points(atlid_PROF_x,ATLID_AOD_from_EXT_outliers4, col="blue", pch=as.character(4), cex=2)
+          points(atlid_PROF_x,ATLID_AOD_from_EXT_outliers5, col="blue", pch=as.character(5), cex=2)
           box(lwd=2, col="grey")
         }
         if (all(is.na(spex_plot_z1))==TRUE) { plot.new() }
@@ -415,7 +475,7 @@ for (p in loop_product) {
       #      box(lwd=2, col="grey")
       
       ### ATLID PROFILE
-      par(mai=c(0.9,0.9,0.0,0.5), family="Century Gothic")
+      par(mai=c(1.1,0.9,0.0,0.5), family="Century Gothic")
       #image(atlid_PROF_x,atlid_PROF_y,atlid_PROF_z,las=1, col=field_pallete$col, breaks=field_pallete$breaks, cex.axis=1.5, xlab="", ylab="", xaxt='n', yaxt='n', bty='n', ylim=c(0,31))
       #imagep(x=atlid_PROF_x, y=atlid_PROF_y, z=atlid_PROF_z, ylim=c(0,31), zlim=c(0,0.3), 
       #       col=oceColorsTurbo,  # Use oce's Jet colormap
@@ -431,9 +491,12 @@ for (p in loop_product) {
       poly.image(x=x, y=y, z=z, col=field_pallete$col, breaks=field_pallete$breaks, xlab="", ylab="", xaxt='n', yaxt='n', bty='n', ylim=c(0,30))
       axis(1, at=atlid_PROF_x, labels=paste0(round(atlid_PROF_plot_lon,2),"\n",round(atlid_PROF_plot_lat,2)), las=1, cex.axis=1.5, line=1.5, tick=F)
       abline(h=seq(0,40,5), lwd=0.5, col="grey")
+      abline(v=atlid_PROF_x[ID], col="grey95", lwd=3.5)
       #lines(atlid_PROF_x, atlid_PROF_TropopauseHeight)
       profile_distance <- round(oce::geodDist(longitude1=orbit_lonmin, latitude1=orbit_latmin, longitude2=orbit_lonmax, latitude2=orbit_latmin),1) ### DISTANCE IN KM
-      title(xlab=paste0("ATLID Longitude/Latitude    |    Distance=",profile_distance," km"), line=5, cex.lab=2.2)
+      title(xlab=paste0("ATLID Longitude/Latitude    |    Distance=",profile_distance," km"), line=4.5, cex.lab=2.2)
+      title(xlab=paste0("ATLID file: ",atlid_filename[[p]][orbit_ID[s]],"    |    ATLID ScienceData/along_track: ",min(atlid_PROF_plot_ID),"-",max(atlid_PROF_plot_ID)), line=6.5, cex.lab=1.5, col="grey80")
+      #title(xlab=paste0("ATLID Longitude/Latitude    |    Distance=",profile_distance," km"), line=5, cex.lab=2.2)
       axis(2, seq(0,40,5), las=1, cex.axis=1.5)
       abline(h=seq(0,40,5), lwd=0.5, col="grey")
       title(ylab="ATLID Altitude (km)", line=4, cex.lab=2.2)

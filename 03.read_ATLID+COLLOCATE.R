@@ -60,7 +60,8 @@ names(atlid_path_in)  <- atlid_product
 for (product in atlid_product) {
   atlid_path_in[[product]]  <- paste0(path_data_earthcare,"/ATL_",product,"_2A/",YYYY,"/",MM,"/",DD,"/")
   #atlid_filename[[product]] <- list.files(path=atlid_path_in[[product]], pattern=paste0("ECA_EXAA_ATL_",product,"_2A_*")) # EXAA
-  atlid_filename[[product]] <- list.files(path=atlid_path_in[[product]], pattern=paste0("ECA_EXAC_ATL_",product,"_2A_*")) # EXAC
+  #atlid_filename[[product]] <- list.files(path=atlid_path_in[[product]], pattern=paste0("ECA_EXAC_ATL_",product,"_2A_*")) # EXAC
+  atlid_filename[[product]] <- list.files(path=atlid_path_in[[product]], pattern=paste0("ECA_",atlid_version,"_ATL_",product,"_2A_*"))
 }
 ### Initializing collocated variables
 col_geodata <- atlid_geodata
