@@ -185,22 +185,7 @@ for (p in loop_product) {
           ID_class_row <- unique(which(atlid_TC_classification == 1 | atlid_TC_classification==2, arr.ind=T)[,1])
           atlid_PROF_z[ID_class_row,]=NA
         }
-        
-        #TODO (Not working...)
-        # On second thought it doesn't much sense.
-        # The half columns can be totally valid columns that could have been picked up by PACE as well.
-        # They just have a thinner aerosol layer.
-        ##################################### EBD Extinction filtered out columns that are not complete column
-        ### FILTER HALF RETRIEVED COLUMNS ### (1) Considering pixel above surface >0m and below <5000m where most aerosol are
-        ##################################### (2) Should include at least 95% within this range
-        #        if (filter_half_column == TRUE) {
-        #          mask <- atlid_PROF_LayerHeight>0 & atlid_PROF_LayerHeight<5000
-        #          atlid_EBD_classification <- atlid_vardata_sel$EBD$`ScienceData/quality_status`[ID,]
-        #          #ID_class <- which(atlid_PROF_z == 0)
-        #          #atlid_PROF_z[ID_class,]=NA
-        #        }
-        
-      }
+      } # END LOOP FOR ORBIT
       
       if ( grepl("particle_extinction_coefficient", atlid_varname[[p]][v]) ) {
         # Filter out Likely_Bad=2,Bad=3 and Very Bad=4 pixels based on quality status
@@ -310,7 +295,7 @@ for (p in loop_product) {
 	###
 	### FILTER AOD OUTLIERS: Several rules...
 	###
-        # (1) ATLID AOD > ATLID mean AOD of the scene * 4
+	# (1) ATLID AOD > ATLID mean AOD of the scene * 4
         ID_AOD_outlier1 <- which(ATLID_AOD_from_EXT >  mean(ATLID_AOD_from_EXT,na.rm=T)*4)
         # (2) ATLID AOD > ATLID mean AOD of the scene * 3.5 and 1 pixel-distance from liquid clouds (Warm or Supercooled)
         ID_AOD_outlier2 <- which(ATLID_AOD_from_EXT >  mean(ATLID_AOD_from_EXT,na.rm=T)*3.5)
@@ -332,25 +317,53 @@ for (p in loop_product) {
         ID_AOD_outlier5_CloudDistance <- which(apply(atlid_TC_classification, 1, function(row) any(row %in% c(1, 2)))) # Check which ATLID profiles are Liquid Clouds (Warm or SuperCooled)
         CloseToCloudsID <- sapply(ID_AOD_outlier5, function(x) any(abs(x - ID_AOD_outlier5_CloudDistance) <= 4))       # Create a logical vector indicating if each value in Vector1 is close to any in Vector2
         if (length(CloseToCloudsID)>=1) {ID_AOD_outlier5 <- ID_AOD_outlier5[CloseToCloudsID]} else {ID_AOD_outlier5 <- NULL} # Keep only the values that are close to clouds
+        # (6) ATLID AOD < ATLID mean AOD of the scene / 2.0 and at least one noise pixel in the profile -> Pretty strict!!
+        ID_AOD_outlier6 <- which(ATLID_AOD_from_EXT <  mean(ATLID_AOD_from_EXT,na.rm=T)/2.0)
+        ID_AOD_outlier6_NoiseProfile <- which(apply(atlid_TC_classification, 1, function(row) any(row %in% c(-1)))) # Check which ATLID profiles noise pixels
+        ID_AOD_outlier6 <- ID_AOD_outlier6[ID_AOD_outlier6 %in% ID_AOD_outlier6_NoiseProfile]
+        # (7) When difference of ATLID from SPEXone (FGE type) is > 75% and noise pixels are in the ATLID profile (based  on ATLID-SPEXone difference, almost cheating... almost since noise is involved)
+        ID_AOD_outlier7 <- which(abs(2*((ATLID_AOD_from_EXT-spex_plot_z1)/(ATLID_AOD_from_EXT+spex_plot_z1)))*100 > 75)
+        ID_AOD_outlier7_NoiseProfile <- which(apply(atlid_TC_classification, 1, function(row) any(row %in% c(-1)))) # Check which ATLID profiles noise pixels
+        ID_AOD_outlier7 <- ID_AOD_outlier7[ID_AOD_outlier7 %in% ID_AOD_outlier7_NoiseProfile]
+	# (8) When 30% of the profile is noise between 0-5km -> Since 60-100% of AOD is on those lower levels
+        # I will work with colMeans not much of a difference to go by profile in atlitude
+        #ID_Altitude0to5km <- which(colMeans(atlid_PROF_y) >= 0 & colMeans(atlid_PROF_y) <= 5)
+        ID_Altitude0to5km <- which(colMeans(atlid_PROF_y[,254:1]) >= 0 & colMeans(atlid_PROF_y[,254:1]) <= 5) # I have to reverse the altitude for some reason if I wanna use it for atlid_TC_classification
+	PercentageNoisePixel0to5km <- 100 * (apply(atlid_TC_classification[, ID_Altitude0to5km], 1, function(row) sum(row == -1)) / length(ID_Altitude0to5km)) # Count percentage of noise pixels (=-1)
+        #print(PercentageNoisePixel0to5km)
+	ID_AOD_outlier8 <- which(PercentageNoisePixel0to5km > 30)
+        
         # Exlude cases that belong to another category with order
         ID_AOD_outlier2 <- setdiff(ID_AOD_outlier2, ID_AOD_outlier1)
         ID_AOD_outlier3 <- setdiff(ID_AOD_outlier3, c(ID_AOD_outlier1, ID_AOD_outlier2))
         ID_AOD_outlier4 <- setdiff(ID_AOD_outlier4, c(ID_AOD_outlier1, ID_AOD_outlier2, ID_AOD_outlier3))
         ID_AOD_outlier5 <- setdiff(ID_AOD_outlier5, c(ID_AOD_outlier1, ID_AOD_outlier2, ID_AOD_outlier3, ID_AOD_outlier4))
-        # Clean and save vectors for ploting
+        ID_AOD_outlier6 <- setdiff(ID_AOD_outlier6, c(ID_AOD_outlier1, ID_AOD_outlier2, ID_AOD_outlier3, ID_AOD_outlier4, ID_AOD_outlier5))
+        ID_AOD_outlier7 <- setdiff(ID_AOD_outlier7, c(ID_AOD_outlier1, ID_AOD_outlier2, ID_AOD_outlier3, ID_AOD_outlier4, ID_AOD_outlier5, ID_AOD_outlier6))
+        ID_AOD_outlier8 <- setdiff(ID_AOD_outlier8, c(ID_AOD_outlier1, ID_AOD_outlier2, ID_AOD_outlier3, ID_AOD_outlier4, ID_AOD_outlier5, ID_AOD_outlier6, ID_AOD_outlier7))
+	# Clean and save vectors for ploting
         ATLID_AOD_from_EXT_outliers1 <- ATLID_AOD_from_EXT
         ATLID_AOD_from_EXT_outliers2 <- ATLID_AOD_from_EXT
         ATLID_AOD_from_EXT_outliers3 <- ATLID_AOD_from_EXT
         ATLID_AOD_from_EXT_outliers4 <- ATLID_AOD_from_EXT
         ATLID_AOD_from_EXT_outliers5 <- ATLID_AOD_from_EXT
+        ATLID_AOD_from_EXT_outliers6 <- ATLID_AOD_from_EXT
+        ATLID_AOD_from_EXT_outliers7 <- ATLID_AOD_from_EXT
+	ATLID_AOD_from_EXT_outliers8 <- ATLID_AOD_from_EXT
         if (length(ID_AOD_outlier1)>=1) {ATLID_AOD_from_EXT_outliers1[-ID_AOD_outlier1]=NA} else {ATLID_AOD_from_EXT_outliers1[]=NA}
         if (length(ID_AOD_outlier2)>=1) {ATLID_AOD_from_EXT_outliers2[-ID_AOD_outlier2]=NA} else {ATLID_AOD_from_EXT_outliers2[]=NA}
         if (length(ID_AOD_outlier3)>=1) {ATLID_AOD_from_EXT_outliers3[-ID_AOD_outlier3]=NA} else {ATLID_AOD_from_EXT_outliers3[]=NA}
         if (length(ID_AOD_outlier4)>=1) {ATLID_AOD_from_EXT_outliers4[-ID_AOD_outlier4]=NA} else {ATLID_AOD_from_EXT_outliers4[]=NA}
         if (length(ID_AOD_outlier5)>=1) {ATLID_AOD_from_EXT_outliers5[-ID_AOD_outlier5]=NA} else {ATLID_AOD_from_EXT_outliers5[]=NA}
-	ATLID_AOD_from_EXT_outliers <- c(ATLID_AOD_from_EXT_outliers1, ATLID_AOD_from_EXT_outliers2, ATLID_AOD_from_EXT_outliers3, ATLID_AOD_from_EXT_outliers4, ATLID_AOD_from_EXT_outliers5) # Just for use in ymax
-        ATLID_AOD_from_EXT[c(ID_AOD_outlier1,ID_AOD_outlier2,ID_AOD_outlier3,ID_AOD_outlier4,ID_AOD_outlier5)]=NA
+        if (length(ID_AOD_outlier6)>=1) {ATLID_AOD_from_EXT_outliers6[-ID_AOD_outlier6]=NA} else {ATLID_AOD_from_EXT_outliers6[]=NA}
+        if (length(ID_AOD_outlier7)>=1) {ATLID_AOD_from_EXT_outliers7[-ID_AOD_outlier7]=NA} else {ATLID_AOD_from_EXT_outliers7[]=NA}
+	if (length(ID_AOD_outlier8)>=1) {ATLID_AOD_from_EXT_outliers8[-ID_AOD_outlier8]=NA} else {ATLID_AOD_from_EXT_outliers8[]=NA}
+        ATLID_AOD_from_EXT_outliers <- c(ATLID_AOD_from_EXT_outliers1, ATLID_AOD_from_EXT_outliers2, ATLID_AOD_from_EXT_outliers3,
+                                         ATLID_AOD_from_EXT_outliers4, ATLID_AOD_from_EXT_outliers5, ATLID_AOD_from_EXT_outliers6,
+                                         ATLID_AOD_from_EXT_outliers7, ATLID_AOD_from_EXT_outliers8) # Just for use in ymax
+        ATLID_AOD_from_EXT[c(ID_AOD_outlier1,ID_AOD_outlier2,ID_AOD_outlier3,ID_AOD_outlier4,ID_AOD_outlier5,ID_AOD_outlier6,ID_AOD_outlier7,ID_AOD_outlier8)]=NA
 
+	### PLOT  DATA TABLE TO EXPORT AND SCATTERPLOT
         plot_data <- data.table(spex_AOD355 = spex_plot_z1,
                                 atlid_AOD355 = ATLID_AOD_from_EXT,
                                 spex_origID2 = spex_plot_origID2,
@@ -414,12 +427,16 @@ for (p in loop_product) {
 	  abline(v=atlid_PROF_x[ID], col="grey95", lwd=3.5)
           ### Plot ATLID AOD
           points(atlid_PROF_x,ATLID_AOD_from_EXT, col="blue", pch=19)
-	  points(atlid_PROF_x,ATLID_AOD_from_EXT_outliers1, col="blue", pch=as.character(1), cex=2)
-          points(atlid_PROF_x,ATLID_AOD_from_EXT_outliers2, col="blue", pch=as.character(2), cex=2)
-          points(atlid_PROF_x,ATLID_AOD_from_EXT_outliers3, col="blue", pch=as.character(3), cex=2)
-          points(atlid_PROF_x,ATLID_AOD_from_EXT_outliers4, col="blue", pch=as.character(4), cex=2)
-          points(atlid_PROF_x,ATLID_AOD_from_EXT_outliers5, col="blue", pch=as.character(5), cex=2)
-          box(lwd=2, col="grey")
+          points(atlid_PROF_x,ATLID_AOD_from_EXT, col="blue", pch=19)
+	  points(atlid_PROF_x,ATLID_AOD_from_EXT_outliers1, col="blue", pch=as.character("H"), cex=1.5)  # High values
+          text(atlid_PROF_x,ATLID_AOD_from_EXT_outliers2, col="blue", label=as.character("C1"), cex=1.5) # High values + Nearby clouds 1
+          text(atlid_PROF_x,ATLID_AOD_from_EXT_outliers3, col="blue", label=as.character("C2"), cex=1.5) # High values + Nearby clouds 2
+          text(atlid_PROF_x,ATLID_AOD_from_EXT_outliers4, col="blue", label=as.character("C3"), cex=1.5) # High values + Nearby clouds 3
+          text(atlid_PROF_x,ATLID_AOD_from_EXT_outliers5, col="blue", label=as.character("C4"), cex=1.5) # High values + Nearby clouds 4
+          text(atlid_PROF_x,ATLID_AOD_from_EXT_outliers6, col="blue", label=as.character("N1"), cex=1.5) # Low values + noise
+          text(atlid_PROF_x,ATLID_AOD_from_EXT_outliers7, col="blue", label=as.character("N2"), cex=1.5) # High difference between ATLID and SPEXone + noise
+	  text(atlid_PROF_x,ATLID_AOD_from_EXT_outliers8, col="blue", label=as.character("N3"), cex=1.5) # High percentage (>30%) of noise between 0-5km
+	  box(lwd=2, col="grey")
         }
         if (all(is.na(spex_plot_z1))==TRUE) { plot.new() }
       }
