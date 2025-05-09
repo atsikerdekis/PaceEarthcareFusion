@@ -51,6 +51,8 @@ path_data_earthcare <- "/net/pc230016/nobackup_1/users/zadelhof/EarthCARE_DATA/L
 source(paste0(path_call,"Spatiotemporal_Collocator.R"))
 source(paste0(path_call,"print_progress.R"))
 source(paste0(path_call,"ScatterPLOT3.R"))
+source(paste0(path_call,"download_MSI_RGR.R"))
+source(paste0(path_call,"plot_MSI_RGB.R"))
 get_AngstromExponent    <- function(aodW1, aodW2, wave1, wave2) { - log( aodW1 / aodW2 ) / log( wave1 / wave2 ) }
 get_AerosolOpticalDepth <- function(aodOLD, waveOLD, waveNEW, angstrom) { aodNEW <- ( (waveNEW/waveOLD) ^ (-angstrom) ) * aodOLD; aodNEW }
 compress_image          <- function(file_in, file_out) {system(paste0(path_MAGICK,"convert ",file_in," +dither -colors 256 ",file_out))}

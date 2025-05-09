@@ -15,8 +15,7 @@ loop_orbit    <- 1:length(orbit_ID) # 1:length(orbit_ID)
 ### INPUT ###
 #############
 filter_cloud_column <- TRUE
-filter_half_column  <- FALSE
-plot_version         <- "FilterWarmCloudColumn_FilterSupercooledCloudColumn_IncludeNAT" # String for plot versioning e.g. "filter_cloud_columns_applied"... a mouthful but you get the point
+plot_version        <- "FiltersForPixelAdjacentToCloudAndNoise" # String for plot versioning e.g. "filter_cloud_columns_applied"... a mouthful but you get the point
 
 ### CREATE PLOT DATE
 dir.create( paste0(path_plot,gsub("-","",mydate)), showWarnings=F, recursive = TRUE)
@@ -128,13 +127,14 @@ for (p in loop_product) {
       ### ATLID select ALL (not only the collocated points) within this MIN and MAX area
       atlid_PROF_plot_lon <- atlid_geodata_sel[[p]]$lon[ID]
       atlid_PROF_plot_lat <- atlid_geodata_sel[[p]]$lat[ID]
+      atlid_PROF_plot_tim <- atlid_geodata_sel[[p]]$tim[ID]
       atlid_PROF_plot_ID  <- atlid_geodata_sel[[p]]$atlid_ID[ID]
       atlid_geodata_sel[[p]]$orbit_ID[ID]
       atlid_geodata_sel[[p]]$atlid_ID[ID]
       atlid_PROF_x <- atlid_PROF_plot_lon
       #atlid_PROF_y <- rev(apply(atlid_vardata_sel[[p]]$`ScienceData/height`[ID,],2,mean))/1000 # 2D
       atlid_PROF_y <- atlid_vardata_sel[[p]]$`ScienceData/height`[ID,]/1000 # 3D
-      atlid_PROF_y <- atlid_PROF_y[,254:1]
+      atlid_PROF_y <- atlid_PROF_y[,dim(atlid_PROF_y)[2]:1]
       atlid_PROF_z <- atlid_vardata_sel[[p]][[v]][ID,]
       atlid_PROF_z[which(atlid_PROF_z > 9.969210e+35)]=NA
       
@@ -194,7 +194,7 @@ for (p in loop_product) {
         atlid_PROF_z[ID_class]=NA
         ### Extinction (m^-1) to Extinction (Unitless)
         atlid_PROF_LayerThickness <- atlid_vardata_sel[[p]]$`ScienceData/height`[ID,]
-        atlid_PROF_LayerThickness <- cbind(atlid_PROF_LayerThickness[,1]+496, atlid_PROF_LayerThickness[,1:253]) - atlid_PROF_LayerThickness
+        atlid_PROF_LayerThickness <- cbind(atlid_PROF_LayerThickness[,1]+496, atlid_PROF_LayerThickness[,1:(dim(atlid_PROF_LayerThickness)[2]-1)]) - atlid_PROF_LayerThickness
         atlid_PROF_z              <- atlid_PROF_z * atlid_PROF_LayerThickness
         # Make negative extinction to NA? 100% a wrong move...
         atlid_PROF_z[which(atlid_PROF_z<0)]=NA
@@ -328,7 +328,7 @@ for (p in loop_product) {
 	# (8) When 30% of the profile is noise between 0-5km -> Since 60-100% of AOD is on those lower levels
         # I will work with colMeans not much of a difference to go by profile in atlitude
         #ID_Altitude0to5km <- which(colMeans(atlid_PROF_y) >= 0 & colMeans(atlid_PROF_y) <= 5)
-        ID_Altitude0to5km <- which(colMeans(atlid_PROF_y[,254:1]) >= 0 & colMeans(atlid_PROF_y[,254:1]) <= 5) # I have to reverse the altitude for some reason if I wanna use it for atlid_TC_classification
+        ID_Altitude0to5km <- which(colMeans(atlid_PROF_y[,dim(atlid_PROF_y)[2]:1]) >= 0 & colMeans(atlid_PROF_y[,dim(atlid_PROF_y)[2]:1]) <= 5) # I have to reverse the altitude for some reason if I wanna use it for atlid_TC_classification
 	PercentageNoisePixel0to5km <- 100 * (apply(atlid_TC_classification[, ID_Altitude0to5km], 1, function(row) sum(row == -1)) / length(ID_Altitude0to5km)) # Count percentage of noise pixels (=-1)
         #print(PercentageNoisePixel0to5km)
 	ID_AOD_outlier8 <- which(PercentageNoisePixel0to5km > 30)
@@ -492,7 +492,7 @@ for (p in loop_product) {
       #      box(lwd=2, col="grey")
       
       ### ATLID PROFILE
-      par(mai=c(1.1,0.9,0.0,0.5), family="Century Gothic")
+      par(mai=c(1.2,0.9,0.0,0.5), family="Century Gothic")
       #image(atlid_PROF_x,atlid_PROF_y,atlid_PROF_z,las=1, col=field_pallete$col, breaks=field_pallete$breaks, cex.axis=1.5, xlab="", ylab="", xaxt='n', yaxt='n', bty='n', ylim=c(0,31))
       #imagep(x=atlid_PROF_x, y=atlid_PROF_y, z=atlid_PROF_z, ylim=c(0,31), zlim=c(0,0.3), 
       #       col=oceColorsTurbo,  # Use oce's Jet colormap
@@ -506,13 +506,13 @@ for (p in loop_product) {
       z <- atlid_PROF_z
       z[which(z>max(field_pallete$breaks))]=max(field_pallete$breaks)
       poly.image(x=x, y=y, z=z, col=field_pallete$col, breaks=field_pallete$breaks, xlab="", ylab="", xaxt='n', yaxt='n', bty='n', ylim=c(0,30))
-      axis(1, at=atlid_PROF_x, labels=paste0(round(atlid_PROF_plot_lon,2),"\n",round(atlid_PROF_plot_lat,2)), las=1, cex.axis=1.5, line=1.5, tick=F)
+      axis(1, at=atlid_PROF_x, labels=paste0(round(atlid_PROF_plot_lon,2),"\n",round(atlid_PROF_plot_lat,2),"\n",format(atlid_PROF_plot_tim, format="%H:%M:%S")), las=1, cex.axis=1.5, line=2.5, tick=F) 
       abline(h=seq(0,40,5), lwd=0.5, col="grey")
       abline(v=atlid_PROF_x[ID], col="grey95", lwd=3.5)
       #lines(atlid_PROF_x, atlid_PROF_TropopauseHeight)
       profile_distance <- round(oce::geodDist(longitude1=orbit_lonmin, latitude1=orbit_latmin, longitude2=orbit_lonmax, latitude2=orbit_latmin),1) ### DISTANCE IN KM
-      title(xlab=paste0("ATLID Longitude/Latitude    |    Distance=",profile_distance," km"), line=4.5, cex.lab=2.2)
-      title(xlab=paste0("ATLID file: ",atlid_filename[[p]][orbit_ID[s]],"    |    ATLID ScienceData/along_track: ",min(atlid_PROF_plot_ID),"-",max(atlid_PROF_plot_ID)), line=6.5, cex.lab=1.5, col="grey80")
+      title(xlab=paste0("ATLID Longitude/Latitude/Time    |    Distance=",profile_distance," km"), line=5.5, cex.lab=2.2)
+      title(xlab=paste0("ATLID file: ",atlid_filename[[p]][orbit_ID[s]],"    |    ATLID ScienceData/along_track: ",min(atlid_PROF_plot_ID),"-",max(atlid_PROF_plot_ID)), line=7.5, cex.lab=1.5, col="grey80")
       #title(xlab=paste0("ATLID Longitude/Latitude    |    Distance=",profile_distance," km"), line=5, cex.lab=2.2)
       axis(2, seq(0,40,5), las=1, cex.axis=1.5)
       abline(h=seq(0,40,5), lwd=0.5, col="grey")
@@ -594,6 +594,16 @@ for (p in loop_product) {
       par(mai=c(0.5,0.5,0.0,0.1), family="Century Gothic")
       plot(col_data$LON1, col_data$LAT1, col="white", cex=1, pch=19, cex.axis=1.5, las=1, asp=T, xlab="",ylab="", xlim=c(orbit_lonmin,orbit_lonmax), ylim=c(orbit_latmin,orbit_latmax))
       map("worldHires", fill=T, add=TRUE, col="grey95", lwd=1, interior=F, asp=T)
+      ### DOWNLOAD MSI RGR
+      file_MSI_RGR <- download_MSI_RGR(input_date=format(mean(atlid_PROF_plot_tim),format="%Y%m%d"), input_stime=format(mean(atlid_PROF_plot_tim),format="%H%M%S"), input_etime=format(mean(atlid_PROF_plot_tim),format="%H%M%S"))
+      print(file_MSI_RGR)
+      ### Unzip
+      unzip(zipfile=file_MSI_RGR, exdir=path_temp)
+      plot_MSI_RGB(filename=gsub("ZIP","h5",file_MSI_RGR), lonmin=orbit_lonmin-0.5, lonmax=orbit_lonmax+0.5, latmin=orbit_latmin-0.5, latmax=orbit_latmax+0.5)
+      ### Remove MSI RGR
+      file.remove(paste0(file_MSI_RGR))
+      file.remove(paste0(gsub("ZIP","h5",file_MSI_RGR)))
+      file.remove(paste0(gsub("ZIP","HDR",file_MSI_RGR)))
       points(col_data$LON1, col_data$LAT1, col="blue", xlim=c(117,118), ylim=c(-7,-12), cex=1.5, pch=19, cex.axis=1.5, las=1)
       points(col_data$LON2, col_data$LAT2, col="red", cex=1.5, pch=19)
       points(spex_geodata$lon, spex_geodata$lat, cex=1, col="orange", pch=3)

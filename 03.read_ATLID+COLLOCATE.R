@@ -161,7 +161,18 @@ for (p in 1:length(atlid_product)) { # 1:length(atlid_product)
         for (v in 1:length(atlid_varname[[p]])) {
           vardim <- length(dim(atlid_vardata[[p]][[v]]))
           if (vardim==1) { atlid_vardata_sel[[p]][[v]] <- c(atlid_vardata_sel[[p]][[v]], atlid_vardata[[p]][[v]]) }
-          if (vardim==2) { atlid_vardata_sel[[p]][[v]] <- rbind(atlid_vardata_sel[[p]][[v]], atlid_vardata[[p]][[v]]) }
+          if (vardim==2) {
+		  ### TODO: DEBUG -> For some reason (?) in EXAE the number of layers vary between 242 and 241 which causes problems obviously...
+		  ###                Double check it with Gerd-Jan. Practical fix for now minimal effect on results...
+		  if (!is.null(dim(atlid_vardata[[p]][[v]])) && dim(atlid_vardata[[p]][[v]])[2] == 241) { 
+			  message(paste0("Problematic file with 241 layers: ",atlid_filename[[p]][[f]]))
+			  atlid_vardata[[p]][[v]] <- cbind(atlid_vardata[[p]][[v]][,1], atlid_vardata[[p]][[v]]) 
+		  }
+		  #print(paste0("atlid_vardata:",dim(atlid_vardata[[p]][[v]])))
+		  #print(paste0("atlid_vardata_sel:",dim(atlid_vardata_sel[[p]][[v]])))
+		  #print(head(atlid_vardata_sel[[p]][[v]]))
+		  #print(head(atlid_vardata[[p]][[v]]))
+		  atlid_vardata_sel[[p]][[v]] <- rbind(atlid_vardata_sel[[p]][[v]], atlid_vardata[[p]][[v]]) }
         }
       } # END IF FOR FOUNDED COLLOCATTED POINTS
     } # END IF FOR COLLOCATION CHECK
