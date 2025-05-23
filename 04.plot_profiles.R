@@ -117,6 +117,9 @@ for (p in loop_product) {
       orbit_lonmin <- min(c(col_geodata[[p]]$LON1[ID],col_geodata[[p]]$LON2[ID]))
       orbit_latmax <- max(c(col_geodata[[p]]$LAT1[ID],col_geodata[[p]]$LAT2[ID]))
       orbit_latmin <- min(c(col_geodata[[p]]$LAT1[ID],col_geodata[[p]]$LAT2[ID]))
+      spex_plot_min_time  <- min(col_geodata[[p]]$TIM2[ID])
+      spex_plot_max_time  <- max(col_geodata[[p]]$TIM2[ID])
+      spex_plot_mean_time <- mean(col_geodata[[p]]$TIM2[ID])
       ### ATLID find ALL (not only the collocated points) within this MIN and MAX area
       ID <- which(atlid_geodata_sel[[p]]$orbit_ID==orbit_ID[s] &
                     atlid_geodata_sel[[p]]$lon <= orbit_lonmax &
@@ -394,9 +397,10 @@ for (p in loop_product) {
       ### PLOT PROFILE PLOTS ###
       ##########################
       dpi <- 300
-      png(filename=paste0(path_plot,gsub("-","",mydate),"/Case_",atlid_version,"_",sprintf("%02d",s),"_",atlid_product[p],"_",gsub(" ","",gsub("\n","",atlid_vartitle[[p]][v])),"_DIST",dist,"_TDIF",tdif,"_",mydate,"_",plot_version,".png"), width=6.0*dpi+0.3*dpi+1*dpi, height=0.5*dpi+3*dpi)
-      #myl <- layout(mat=matrix(c(1:3,4,2,3,5:7),3,3, byrow=T), widths=c(6.0,0.3,1), heights=c(0.5,0.5,3)) # FOR AE timeseries
-      myl <- layout(mat=matrix(c(1:6),2,3, byrow=T), widths=c(6.0,0.3,1), heights=c(1,3))
+      png(filename=paste0(path_plot,gsub("-","",mydate),"/Case_",atlid_version,"_",sprintf("%02d",s),"_",atlid_product[p],"_",gsub(" ","",gsub("\n","",atlid_vartitle[[p]][v])),"_DIST",dist,"_TDIF",tdif,"_",mydate,"_",plot_version,".png"), 
+	  width=6.0*dpi+0.3*dpi+0.8*dpi+0.7*dpi, height=0.5*dpi+3*dpi)
+      myl <- layout(mat=matrix(c(1:3,3:7),2,4, byrow=T), widths=c(6.0,0.3,0.8,0.7), heights=c(1,3))
+      
       layout.show(myl)
       
       ### PLOT AOD FOR ATLID & SPEXone
@@ -436,6 +440,7 @@ for (p in loop_product) {
           text(atlid_PROF_x,ATLID_AOD_from_EXT_outliers6, col="blue", label=as.character("N1"), cex=1.5) # Low values + noise
           text(atlid_PROF_x,ATLID_AOD_from_EXT_outliers7, col="blue", label=as.character("N2"), cex=1.5) # High difference between ATLID and SPEXone + noise
 	  text(atlid_PROF_x,ATLID_AOD_from_EXT_outliers8, col="blue", label=as.character("N3"), cex=1.5) # High percentage (>30%) of noise between 0-5km
+	  legend("topleft", legend=c("ATLID","SPEXone"), pch=c(19,19), col=c("blue","red"), cex=1.5)
 	  box(lwd=2, col="grey")
         }
         if (all(is.na(spex_plot_z1))==TRUE) { plot.new() }
@@ -462,7 +467,7 @@ for (p in loop_product) {
       latmin <- min(c(col_data$LAT1,col_data$LAT2),na.rm=T)
       latmax <- max(c(col_data$LAT1,col_data$LAT2),na.rm=T)
       mapPlot(projection=paste0("+proj=tpers +h=1e7 +lon_0=",mean(c(lonmin,lonmax))," +lat_0=",mean(c(latmin,latmax))), 
-              longitudelim=c(lonmin-20,lonmax+20), latitudelim=c(latmin-30,latmax+30), grid=F, axes=F, drawBox=F, col="grey95")
+              longitudelim=c(lonmin-20,lonmax+20), latitudelim=c(latmin-20,latmax+20), grid=F, axes=F, drawBox=F, col="grey95")
       mapGrid(longitude=seq(-180,180,5), latitude=seq(-90,90,5), lwd=0.5)
       mapPoints(spex_geodata$lon, spex_geodata$lat, cex=0.1, col="orange", pch=3)
       mapPoints(atlid_geodata_all[[p]]$lon, atlid_geodata_all[[p]]$lat, col="#00BFFF", pch=19, cex=0.1)
@@ -590,20 +595,20 @@ for (p in loop_product) {
       }
       box(lwd=2, col="grey")
       
-      ### MAP ZOOM
-      par(mai=c(0.5,0.5,0.0,0.1), family="Century Gothic")
-      plot(col_data$LON1, col_data$LAT1, col="white", cex=1, pch=19, cex.axis=1.5, las=1, asp=T, xlab="",ylab="", xlim=c(orbit_lonmin,orbit_lonmax), ylim=c(orbit_latmin,orbit_latmax))
+      ### MSI pseudo-RGB
+      par(mai=c(0.5,0.5,0.0,0.0), family="Century Gothic")
+      plot(col_data$LON1, col_data$LAT1, col="white", cex=1, pch=19, cex.axis=1.5, las=1, asp=T, xlab="",ylab="", xlim=c(orbit_lonmin,orbit_lonmax), ylim=c(orbit_latmin,orbit_latmax), yaxt="n", xaxt="n")
+      axis(side=1, at=seq(-180,180,dist*2), cex.axis=1.5, las=1)
+      axis(side=2, at=seq(-90,90,dist*2), cex.axis=1.5, las=1)
       map("worldHires", fill=T, add=TRUE, col="grey95", lwd=1, interior=F, asp=T)
-      ### DOWNLOAD MSI RGR
-      file_MSI_RGR <- download_MSI_RGR(input_date=format(mean(atlid_PROF_plot_tim),format="%Y%m%d"), input_stime=format(mean(atlid_PROF_plot_tim),format="%H%M%S"), input_etime=format(mean(atlid_PROF_plot_tim),format="%H%M%S"))
-      print(file_MSI_RGR)
-      ### Unzip
-      unzip(zipfile=file_MSI_RGR, exdir=path_temp)
+      ###
+      file_MSI_RGR <- download_MSI_RGR(input_date=format(mean(atlid_PROF_plot_tim),format="%Y%m%d"), input_stime=format(mean(atlid_PROF_plot_tim),format="%H%M%S"), input_etime=format(mean(atlid_PROF_plot_tim),format="%H%M%S")) # download
+      unzip(zipfile=file_MSI_RGR, exdir=path_temp) # unzip
       plot_MSI_RGB(filename=gsub("ZIP","h5",file_MSI_RGR), lonmin=orbit_lonmin-0.5, lonmax=orbit_lonmax+0.5, latmin=orbit_latmin-0.5, latmax=orbit_latmax+0.5)
-      ### Remove MSI RGR
-      file.remove(paste0(file_MSI_RGR))
-      file.remove(paste0(gsub("ZIP","h5",file_MSI_RGR)))
-      file.remove(paste0(gsub("ZIP","HDR",file_MSI_RGR)))
+      #file.remove(paste0(file_MSI_RGR))                   # Clean-up MSI RGR
+      #file.remove(paste0(gsub("ZIP","h5",file_MSI_RGR)))  # Clean-up MSI RGR
+      #file.remove(paste0(gsub("ZIP","HDR",file_MSI_RGR))) # Clean-up MSI RGR
+      ###
       points(col_data$LON1, col_data$LAT1, col="blue", xlim=c(117,118), ylim=c(-7,-12), cex=1.5, pch=19, cex.axis=1.5, las=1)
       points(col_data$LON2, col_data$LAT2, col="red", cex=1.5, pch=19)
       points(spex_geodata$lon, spex_geodata$lat, cex=1, col="orange", pch=3)
@@ -611,7 +616,51 @@ for (p in loop_product) {
       points(atlid_geodata_all[[p]]$lon, atlid_geodata_all[[p]]$lat, col="#00BFFF", pch=19, cex=0.5)
       abline(v=seq(-180,180,dist),col="grey",lwd=0.5)
       abline(h=seq(-90,90,dist),col="grey",lwd=0.5)
+      legend("topleft", title="\nEarthCARE MSI\npseudo-RGB", title.font=2, legend=c("R=670 nm","G=865 nm","B=1650 nm"), title.col="black", text.col=c("red","#008000","blue"), cex=1.3, box.lwd=2, box.col="grey", y.intersp=0.9)
+      legend("bottomright", title="\nCollocated\nPoints", title.font=2, legend=c("ATLID","SPEXone"), col=c("blue","red"), pch=19, cex=1.3, box.lwd=2, box.col="grey", y.intersp=0.9)
       box(lwd=2, col="grey")
+
+      ### OCI pseudo-RGB
+      par(mai=c(0.5,0.0,0.0,0.1), family="Century Gothic")
+      plot(col_data$LON1, col_data$LAT1, col="white", cex=1, pch=19, cex.axis=1.5, las=1, asp=T, xlab="",ylab="", xlim=c(orbit_lonmin,orbit_lonmax), ylim=c(orbit_latmin,orbit_latmax), yaxt="n", xaxt="n")
+      axis(side=1, at=seq(-180,180,dist*2), cex.axis=1.5, las=1)
+      map("worldHires", fill=T, add=T, col="grey95", lwd=1, interior=F, asp=T)
+      
+      ### OCI with SPEX_MIN TIME 
+      message(paste0("lonmax:",lonmax))
+      message(paste0("lonmin:",lonmin))
+      message(paste0("latmax:",latmax))
+      message(paste0("latmin:",latmin))
+      message(paste0("spex_plot_min_time:",format(spex_plot_min_time,"%Y%m%dT%H%M%S")))
+      message(paste0("spex_plot_min_time:",format(spex_plot_min_time-2.5*60,"%Y%m%dT%H%M%S")))
+      file_OCI_L1B <- download_OCI_L1B(timestamp=format(spex_plot_min_time-2.5*60,"%Y%m%dT%H%M%S"), save_dir=path_temp)
+      plot_OCI_RGB(filename=file_OCI_L1B, RGB_composite="pseudo", lonmin=orbit_lonmin-0.5, lonmax=orbit_lonmax+0.5, latmin=orbit_latmin-0.5, latmax=orbit_latmax+0.5)
+      #file.remove(paste0(file_OCI_L1B)) # Clean-up OCI L1B
+      ###
+
+      ### OCI with SPEX_Max TIME
+      message(paste0("lonmax:",lonmax))
+      message(paste0("lonmin:",lonmin))
+      message(paste0("latmax:",latmax))
+      message(paste0("latmin:",latmin))
+      message(paste0("spex_plot_max_time:",format(spex_plot_max_time,"%Y%m%dT%H%M%S")))
+      message(paste0("spex_plot_max_time:",format(spex_plot_max_time+2.5*60,"%Y%m%dT%H%M%S")))
+      file_OCI_L1B <- download_OCI_L1B(timestamp=format(spex_plot_max_time+2.5*60,"%Y%m%dT%H%M%S"), save_dir=path_temp)
+      plot_OCI_RGB(filename=file_OCI_L1B, RGB_composite="pseudo", lonmin=orbit_lonmin-0.5, lonmax=orbit_lonmax+0.5, latmin=orbit_latmin-0.5, latmax=orbit_latmax+0.5)
+      #file.remove(paste0(file_OCI_L1B)) # Clean-up OCI L1B
+      ###
+
+      points(col_data$LON1, col_data$LAT1, col="blue", xlim=c(117,118), ylim=c(-7,-12), cex=1.5, pch=19, cex.axis=1.5, las=1)
+      points(col_data$LON2, col_data$LAT2, col="red", cex=1.5, pch=19)
+      points(spex_geodata$lon, spex_geodata$lat, cex=1, col="orange", pch=3)
+      for (n in 1:length(col_data$LON1)) { lines(x=c(col_data$LON1[n],col_data$LON2[n]), y=c(col_data$LAT1[n],col_data$LAT2[n]), lwd=0.3, col="yellow") }
+      points(atlid_geodata_all[[p]]$lon, atlid_geodata_all[[p]]$lat, col="#00BFFF", pch=19, cex=0.5)
+      abline(v=seq(-180,180,dist),col="grey",lwd=0.5)
+      abline(h=seq(-90,90,dist),col="grey",lwd=0.5)
+      legend("topleft", title="\nPACE OCI\npseudo-RGB", title.font=2, legend=c("R=670 nm","G=865 nm","B=1619 nm"), title.col="black", text.col=c("red","#008000","blue"), cex=1.3, box.lwd=2, box.col="grey", y.intersp=0.9)
+      legend("bottomright", title="\nCollocated\nPoints", title.font=2, legend=c("ATLID","SPEXone"), col=c("blue","red"), pch=19, cex=1.3, box.lwd=2, box.col="grey", y.intersp=0.9)
+      box(lwd=2, col="grey")
+
       
       dev.off()
     } # LOOP END FOR ORBIT (s)

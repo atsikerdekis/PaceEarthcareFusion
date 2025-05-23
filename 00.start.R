@@ -17,8 +17,8 @@ rm(list=ls())
 #############
 dist  <- 0.2              # Spatial Distance for Collocation (degrees)
 tdif  <- 7200             # Temporal Difference for Collocation (seconds)
-sDate <- "2025-03-11"     # Start date
-eDate <- "2025-03-11"     # End date
+sDate <- "2025-03-14"     # Start date
+eDate <- "2025-03-14"     # End date
 atlid_product <- c("TC_","EBD") # Which ATLID products to analyze? Can be several at once: e.g. c("TC_","FM_","EBD","AER")
 atlid_version <- "EXAE" # Which ATLID version to use
 
