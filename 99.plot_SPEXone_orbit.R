@@ -1,5 +1,5 @@
-rm(list=ls())
-dev.off()
+#rm(list=ls())
+#dev.off()
 
 library("ncdf4")
 library("fields")
@@ -8,17 +8,21 @@ library("mapdata")
 library("mapproj")
 library("maptools")
 library("oce")
-data("coastlineWorldFine")
+#data("coastlineWorldFine")
 data("coastlineWorld")
-path_MAGICK <- "/opt/homebrew/bin/"
+#path_MAGICK <- "/opt/homebrew/bin/"
+path_MAGICK <- "~/miniforge3/envs/PEF/bin/"                   # KNMI Desktop
 compress_image <- function(file_in, file_out) {system(paste0(path_MAGICK,"convert ",file_in," +dither -colors 256 ",file_out))}
+#compress_image <- function(file_in, file_out) {system(paste0(path_MAGICK,"convert ",file_in," +dither -colors 256 ",file_out))}
 
 #############
 ### INPUT ###
 #############
-path_in  <- "AIRSENSE/PEF/data/PACE/SPEXone-L2-V20240716/20240618/"
-path_out <- "AIRSENSE/PEF/plot/"
-filenames <- list.files(path=path_in, pattern="PACE_SPEXONE.*.L2.AER_OCEAN_REMOTAP.nc") # PACE_SPEXONE.20240618T215818.V2.L2.AER_OCEAN_REMOTAP.nc
+#path_in  <- "AIRSENSE/PEF/data/PACE/SPEXone-L2-V20240716/20240618/"
+#path_out <- "AIRSENSE/PEF/plot/"
+path_in <- "/nobackup/users/tsikerde/AIRSENSE/PEF/PACE/SPEXone-L2-DL20250127/20250313/"
+path_out <- "/usr/people/tsikerde/Workspace/AIRSENSE/PEF/plot/20250313/"
+filenames <- list.files(path=path_in, pattern="PACE_SPEXONE.*.L2.AER_LAND_REMOTAP.nc") # PACE_SPEXONE.20240618T215818.V2.L2.AER_OCEAN_REMOTAP.nc
 
 ### Color pallete
 field_breaks <- c(0.00,0.05,0.10,0.15,0.20,0.25,0.30,0.35,0.40,0.50,0.60,0.80,1.00)
@@ -39,16 +43,18 @@ field_pallete$col <- paste0(field_pallete$col, hex_alpha_values)
 #################
 ### READ DATA ###
 #################
-for (f in 36:36) { # length(filenames)
+for (f in 22:22) { # length(filenames)
   message(paste0(f,"/",length(filenames)))
   ############
   ### PLOT ###
   ############
   dpi <- 300
   file_out <- paste0(path_out,gsub(pattern=".nc", replacement=".png", x=filenames[f]))
-  png(file_out, width=4*3*dpi+4*0.75*dpi, height=0.25*dpi+6*dpi+3.75*dpi, res=dpi)
-  myl <- layout(matrix(c(1:16,17,17,18,18,19,19,20,20),3,8,byrow=T), widths=c(3,0.75,3,0.75,3,0.75,3,0.75), heights=c(0.25,6,3.75));layout.show(myl)
-  
+  #png(file_out, width=4*3*dpi+4*0.75*dpi, height=0.25*dpi+6*dpi+3.75*dpi, res=dpi)
+  #myl <- layout(matrix(c(1:16,17,17,18,18,19,19,20,20),3,8,byrow=T), widths=c(3,0.75,3,0.75,3,0.75,3,0.75), heights=c(0.25,6,3.75));layout.show(myl)
+  png(file_out, width=4*3*dpi+4*0.75*dpi, height=0.25*dpi+3*dpi+3.75*dpi, res=dpi)
+  myl <- layout(matrix(c(1:16,17,17,18,18,19,19,20,20),3,8,byrow=T), widths=c(3,0.75,3,0.75,3,0.75,3,0.75), heights=c(0.25,3,3.75));layout.show(myl)
+
   par(mai=c(0,0,0.05,0));plot.new();text(0.5,0.5, bquote(AOD[550]), col="grey20", cex=1.8, family="Century Gothic", srt=0)
   plot.new()
   par(mai=c(0,0,0.05,0));plot.new();text(0.5,0.5, bquote(AOD[550]~Uncertainty), col="grey20", cex=1.8, family="Century Gothic", srt=0)
@@ -64,7 +70,7 @@ for (f in 36:36) { # length(filenames)
   ovar <- ncvar_get(file.nc, "geophysical_data/aot550")
   nc_close(file.nc)
   par(mai=c(0.4,0.4,0.05,0.1))
-  poly.image(x=olon, y=olat, z=ovar, las=1, asp=T, lwd=0.2, family="Century Gothic", zlim=c(0.0,1.0,0.1), breaks=field_pallete$breaks, col=field_pallete$col, border=rgb(0,0,0,0.1))
+  poly.image(x=olon, y=olat, z=ovar, las=1, asp=T, lwd=0.2, family="Century Gothic", zlim=c(0.0,1.0,0.1), breaks=field_pallete$breaks, col=field_pallete$col, border=rgb(0,0,0,0.1), ylim=c(27.4,28.4), xlim=c(-98,-97))
   map("worldHires", fill=F, add=TRUE, col="black", lwd=0.6, interior=F, asp=T)
   map("worldHires", fill=F, add=TRUE, col="grey40", lwd=0.3, interior=T, asp=T)
   map.grid(nx=72, ny=36, col="grey50", lty=3, lwd=0.5, labels=F)
@@ -77,7 +83,7 @@ for (f in 36:36) { # length(filenames)
   ovar <- ncvar_get(file.nc, "geophysical_data/aot550_uncertainty")
   nc_close(file.nc)
   par(mai=c(0.4,0.4,0.05,0.1))
-  poly.image(x=olon, y=olat, z=ovar, las=1, asp=T, lwd=0.2, family="Century Gothic", zlim=c(0.0,1.0,0.1), breaks=field_pallete$breaks, col=field_pallete$col, border=rgb(0,0,0,0.1))
+  poly.image(x=olon, y=olat, z=ovar, las=1, asp=T, lwd=0.2, family="Century Gothic", zlim=c(0.0,1.0,0.1), breaks=field_pallete$breaks, col=field_pallete$col, border=rgb(0,0,0,0.1), ylim=c(27.4,28.4), xlim=c(-98,-97))
   map("worldHires", fill=F, add=TRUE, col="black", lwd=0.6, interior=F, asp=T)
   map("worldHires", fill=F, add=TRUE, col="grey40", lwd=0.3, interior=T, asp=T)
   map.grid(nx=72, ny=36, col="grey50", lty=3, lwd=0.5, labels=F)
@@ -90,7 +96,7 @@ for (f in 36:36) { # length(filenames)
   ovar <- ncvar_get(file.nc, "geophysical_data/aot550_uncertainty") / ncvar_get(file.nc, "geophysical_data/aot550")
   nc_close(file.nc)
   par(mai=c(0.4,0.4,0.05,0.1))
-  poly.image(x=olon, y=olat, z=ovar, las=1, asp=T, lwd=0.2, family="Century Gothic", zlim=c(0.0,1.0,0.1), breaks=field_pallete$breaks, col=field_pallete$col, border=rgb(0,0,0,0.1))
+  poly.image(x=olon, y=olat, z=ovar, las=1, asp=T, lwd=0.2, family="Century Gothic", zlim=c(0.0,1.0,0.1), breaks=field_pallete$breaks, col=field_pallete$col, border=rgb(0,0,0,0.1), ylim=c(27.4,28.4), xlim=c(-98,-97))
   map("worldHires", fill=F, add=TRUE, col="black", lwd=0.6, interior=F, asp=T)
   map("worldHires", fill=F, add=TRUE, col="grey40", lwd=0.3, interior=T, asp=T)
   map.grid(nx=72, ny=36, col="grey50", lty=3, lwd=0.5, labels=F)
@@ -103,7 +109,7 @@ for (f in 36:36) { # length(filenames)
   ovar <- ncvar_get(file.nc, "geophysical_data/aot550_first_guess")
   nc_close(file.nc)
   par(mai=c(0.4,0.4,0.05,0.1))
-  poly.image(x=olon, y=olat, z=ovar, las=1, asp=T, lwd=0.2, family="Century Gothic", zlim=c(0.0,1.0,0.1), breaks=field_pallete$breaks, col=field_pallete$col, border=rgb(0,0,0,0.1))
+  poly.image(x=olon, y=olat, z=ovar, las=1, asp=T, lwd=0.2, family="Century Gothic", zlim=c(0.0,1.0,0.1), breaks=field_pallete$breaks, col=field_pallete$col, border=rgb(0,0,0,0.1), ylim=c(27.4,28.4), xlim=c(-98,-97))
   map("worldHires", fill=F, add=TRUE, col="black", lwd=0.6, interior=F, asp=T)
   map("worldHires", fill=F, add=TRUE, col="grey40", lwd=0.3, interior=T, asp=T)
   map.grid(nx=72, ny=36, col="grey50", lty=3, lwd=0.5, labels=F)

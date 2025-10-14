@@ -1,0 +1,8 @@
+Downloaded from: https://earth.esa.int/eogateway/tools/oads-download
+
+###
+### Just to test: python oads_download.py AEBD -st 20250801 -et 20250831 --no_download
+### From May per version
+### EXAE : 20250501 20250801
+### EXAF : 20250509 20250612
+### EXAG : 20250613 20250821+

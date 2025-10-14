@@ -594,20 +594,24 @@ for (p in loop_product) {
         axis(4, at=mylegend_at[seq(2,1002,50)], labels=mylegend_labels[seq(2,1002,50)], cex.axis=1.5, las=1, family="Century Gothic", tick=F) 
       }
       box(lwd=2, col="grey")
-      
-      ### MSI pseudo-RGB
+
+      ### 
+      ### MSI pseudo-RGB panel
+      ###
       par(mai=c(0.5,0.5,0.0,0.0), family="Century Gothic")
       plot(col_data$LON1, col_data$LAT1, col="white", cex=1, pch=19, cex.axis=1.5, las=1, asp=T, xlab="",ylab="", xlim=c(orbit_lonmin,orbit_lonmax), ylim=c(orbit_latmin,orbit_latmax), yaxt="n", xaxt="n")
       axis(side=1, at=seq(-180,180,dist*2), cex.axis=1.5, las=1)
       axis(side=2, at=seq(-90,90,dist*2), cex.axis=1.5, las=1)
       map("worldHires", fill=T, add=TRUE, col="grey95", lwd=1, interior=F, asp=T)
-      ###
-      file_MSI_RGR <- download_MSI_RGR(input_date=format(mean(atlid_PROF_plot_tim),format="%Y%m%d"), input_stime=format(mean(atlid_PROF_plot_tim),format="%H%M%S"), input_etime=format(mean(atlid_PROF_plot_tim),format="%H%M%S")) # download
-      unzip(zipfile=file_MSI_RGR, exdir=path_temp) # unzip
-      plot_MSI_RGB(filename=gsub("ZIP","h5",file_MSI_RGR), lonmin=orbit_lonmin-0.5, lonmax=orbit_lonmax+0.5, latmin=orbit_latmin-0.5, latmax=orbit_latmax+0.5)
-      #file.remove(paste0(file_MSI_RGR))                   # Clean-up MSI RGR
-      #file.remove(paste0(gsub("ZIP","h5",file_MSI_RGR)))  # Clean-up MSI RGR
-      #file.remove(paste0(gsub("ZIP","HDR",file_MSI_RGR))) # Clean-up MSI RGR
+      ### MSI based on ATLID time
+      if (flag_plot_MSI == TRUE) {
+        file_MSI_RGR <- download_MSI_RGR(input_date=format(mean(atlid_PROF_plot_tim),format="%Y%m%d"), input_stime=format(mean(atlid_PROF_plot_tim),format="%H%M%S"), input_etime=format(mean(atlid_PROF_plot_tim),format="%H%M%S")) # download
+        unzip(zipfile=file_MSI_RGR, exdir=path_temp) # unzip
+        plot_MSI_RGB(filename=gsub("ZIP","h5",file_MSI_RGR), lonmin=orbit_lonmin-0.5, lonmax=orbit_lonmax+0.5, latmin=orbit_latmin-0.5, latmax=orbit_latmax+0.5)
+        #file.remove(paste0(file_MSI_RGR))                   # Clean-up MSI RGR
+        #file.remove(paste0(gsub("ZIP","h5",file_MSI_RGR)))  # Clean-up MSI RGR
+        #file.remove(paste0(gsub("ZIP","HDR",file_MSI_RGR))) # Clean-up MSI RGR
+      }
       ###
       points(col_data$LON1, col_data$LAT1, col="blue", xlim=c(117,118), ylim=c(-7,-12), cex=1.5, pch=19, cex.axis=1.5, las=1)
       points(col_data$LON2, col_data$LAT2, col="red", cex=1.5, pch=19)
@@ -620,36 +624,36 @@ for (p in loop_product) {
       legend("bottomright", title="\nCollocated\nPoints", title.font=2, legend=c("ATLID","SPEXone"), col=c("blue","red"), pch=19, cex=1.3, box.lwd=2, box.col="grey", y.intersp=0.9)
       box(lwd=2, col="grey")
 
-      ### OCI pseudo-RGB
+      ###
+      ### OCI pseudo-RGB panel
+      ###
       par(mai=c(0.5,0.0,0.0,0.1), family="Century Gothic")
       plot(col_data$LON1, col_data$LAT1, col="white", cex=1, pch=19, cex.axis=1.5, las=1, asp=T, xlab="",ylab="", xlim=c(orbit_lonmin,orbit_lonmax), ylim=c(orbit_latmin,orbit_latmax), yaxt="n", xaxt="n")
       axis(side=1, at=seq(-180,180,dist*2), cex.axis=1.5, las=1)
       map("worldHires", fill=T, add=T, col="grey95", lwd=1, interior=F, asp=T)
-      
       ### OCI with SPEX_MIN TIME 
-      message(paste0("lonmax:",lonmax))
-      message(paste0("lonmin:",lonmin))
-      message(paste0("latmax:",latmax))
-      message(paste0("latmin:",latmin))
-      message(paste0("spex_plot_min_time:",format(spex_plot_min_time,"%Y%m%dT%H%M%S")))
-      message(paste0("spex_plot_min_time:",format(spex_plot_min_time-2.5*60,"%Y%m%dT%H%M%S")))
-      file_OCI_L1B <- download_OCI_L1B(timestamp=format(spex_plot_min_time-2.5*60,"%Y%m%dT%H%M%S"), save_dir=path_temp)
-      plot_OCI_RGB(filename=file_OCI_L1B, RGB_composite="pseudo", lonmin=orbit_lonmin-0.5, lonmax=orbit_lonmax+0.5, latmin=orbit_latmin-0.5, latmax=orbit_latmax+0.5)
-      #file.remove(paste0(file_OCI_L1B)) # Clean-up OCI L1B
-      ###
-
-      ### OCI with SPEX_Max TIME
-      message(paste0("lonmax:",lonmax))
-      message(paste0("lonmin:",lonmin))
-      message(paste0("latmax:",latmax))
-      message(paste0("latmin:",latmin))
-      message(paste0("spex_plot_max_time:",format(spex_plot_max_time,"%Y%m%dT%H%M%S")))
-      message(paste0("spex_plot_max_time:",format(spex_plot_max_time+2.5*60,"%Y%m%dT%H%M%S")))
-      file_OCI_L1B <- download_OCI_L1B(timestamp=format(spex_plot_max_time+2.5*60,"%Y%m%dT%H%M%S"), save_dir=path_temp)
-      plot_OCI_RGB(filename=file_OCI_L1B, RGB_composite="pseudo", lonmin=orbit_lonmin-0.5, lonmax=orbit_lonmax+0.5, latmin=orbit_latmin-0.5, latmax=orbit_latmax+0.5)
-      #file.remove(paste0(file_OCI_L1B)) # Clean-up OCI L1B
-      ###
-
+      if (flag_plot_OCI == TRUE) {
+        message(paste0("lonmax:",lonmax))
+        message(paste0("lonmin:",lonmin))
+        message(paste0("latmax:",latmax))
+        message(paste0("latmin:",latmin))
+        message(paste0("spex_plot_min_time:",format(spex_plot_min_time,"%Y%m%dT%H%M%S")))
+        message(paste0("spex_plot_min_time:",format(spex_plot_min_time-2.5*60,"%Y%m%dT%H%M%S")))
+        file_OCI_L1B <- download_OCI_L1B(timestamp=format(spex_plot_min_time-2.5*60,"%Y%m%dT%H%M%S"), save_dir=path_temp)
+        plot_OCI_RGB(filename=file_OCI_L1B, RGB_composite="pseudo", lonmin=orbit_lonmin-0.5, lonmax=orbit_lonmax+0.5, latmin=orbit_latmin-0.5, latmax=orbit_latmax+0.5)
+        #file.remove(paste0(file_OCI_L1B)) # Clean-up OCI L1B
+        ###
+        ### OCI with SPEX_Max TIME
+        message(paste0("lonmax:",lonmax))
+        message(paste0("lonmin:",lonmin))
+        message(paste0("latmax:",latmax))
+        message(paste0("latmin:",latmin))
+        message(paste0("spex_plot_max_time:",format(spex_plot_max_time,"%Y%m%dT%H%M%S")))
+        message(paste0("spex_plot_max_time:",format(spex_plot_max_time+2.5*60,"%Y%m%dT%H%M%S")))
+        file_OCI_L1B <- download_OCI_L1B(timestamp=format(spex_plot_max_time+2.5*60,"%Y%m%dT%H%M%S"), save_dir=path_temp)
+        plot_OCI_RGB(filename=file_OCI_L1B, RGB_composite="pseudo", lonmin=orbit_lonmin-0.5, lonmax=orbit_lonmax+0.5, latmin=orbit_latmin-0.5, latmax=orbit_latmax+0.5)
+        #file.remove(paste0(file_OCI_L1B)) # Clean-up OCI L1B
+      }
       points(col_data$LON1, col_data$LAT1, col="blue", xlim=c(117,118), ylim=c(-7,-12), cex=1.5, pch=19, cex.axis=1.5, las=1)
       points(col_data$LON2, col_data$LAT2, col="red", cex=1.5, pch=19)
       points(spex_geodata$lon, spex_geodata$lat, cex=1, col="orange", pch=3)

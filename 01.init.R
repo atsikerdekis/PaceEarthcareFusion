@@ -6,23 +6,23 @@
 ### Envirom : ...
 ###
 
-message("--> Initialization...")
+message("### Initialization...")
 
 #################
 ### LIBRARIES ###
 #################
-library("ncdf4")
-library("maps")
-library("mapdata")
-library("mapproj")
-library("maptools")
-library("sp")
-library("dplyr")
-library("oce")
-library("ocedata")
-library("fields")
-library("data.table")
-data("coastlineWorldFine")
+suppressMessages(suppressWarnings(library("ncdf4")))
+suppressMessages(suppressWarnings(library("maps")))
+suppressMessages(suppressWarnings(library("mapdata")))
+suppressMessages(suppressWarnings(library("mapproj")))
+suppressMessages(suppressWarnings(library("maptools")))
+suppressMessages(suppressWarnings(library("sp")))
+suppressMessages(suppressWarnings(library("dplyr")))
+suppressMessages(suppressWarnings(library("oce")))
+suppressMessages(suppressWarnings(library("ocedata")))
+suppressMessages(suppressWarnings(library("fields")))
+suppressMessages(suppressWarnings(library("data.table")))
+suppressMessages(suppressWarnings(data("coastlineWorldFine")))
 
 ############
 ### PATH ###
@@ -43,7 +43,10 @@ path_call   <- paste0(path_base,"/code/call/")
 path_plot   <- paste0(path_base,"plot/")
 path_data   <- paste0("/nobackup/users/tsikerde/AIRSENSE/PEF/")
 path_temp   <- "/nobackup/users/tsikerde/AIRSENSE/PEF/temp/"
-path_data_earthcare <- "/net/pc230016/nobackup_1/users/zadelhof/EarthCARE_DATA/L2/"
+path_spex   <- "/nobackup/users/tsikerde/AIRSENSE/PEF/data/SPEXone/"
+path_data_earthcare <- "/nobackup/users/tsikerde/AIRSENSE/PEF/data/ATLID/L2a/"
+path_oads_python <- "~/miniforge3/envs/OADS/bin/"
+path_oads <- "/usr/people/tsikerde/Workspace/AIRSENSE/oads-download-main/"
 
 #################
 ### FUNCTIONS ###
@@ -63,3 +66,10 @@ compress_image          <- function(file_in, file_out) {system(paste0(path_MAGIC
 ### VARIABLES ###
 #################
 dpi <- 300
+
+#############
+### FLAGS ###
+#############
+flag_plot_MSI <- FALSE
+flag_plot_OCI <- FALSE
+

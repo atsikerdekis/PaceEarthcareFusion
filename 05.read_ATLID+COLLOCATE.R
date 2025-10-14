@@ -59,8 +59,6 @@ atlid_path_in         <- vector("list", length(atlid_product))
 names(atlid_path_in)  <- atlid_product
 for (product in atlid_product) {
   atlid_path_in[[product]]  <- paste0(path_data_earthcare,"/ATL_",product,"_2A/",YYYY,"/",MM,"/",DD,"/")
-  #atlid_filename[[product]] <- list.files(path=atlid_path_in[[product]], pattern=paste0("ECA_EXAA_ATL_",product,"_2A_*")) # EXAA
-  #atlid_filename[[product]] <- list.files(path=atlid_path_in[[product]], pattern=paste0("ECA_EXAC_ATL_",product,"_2A_*")) # EXAC
   atlid_filename[[product]] <- list.files(path=atlid_path_in[[product]], pattern=paste0("ECA_",atlid_version,"_ATL_",product,"_2A_*"))
 }
 ### Initializing collocated variables
@@ -71,7 +69,6 @@ atlid_geodata_sel <- atlid_geodata
 atlid_vardata_sel <- atlid_vardata
 ### Initializing atlid geodata for all orbits
 atlid_geodata_all <- atlid_geodata
-
 
 ############
 ### READ ### Reading atlid per product (p) and file orbit (f) for several variables (v) and doing the collocation with SPEXone

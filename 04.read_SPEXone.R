@@ -9,11 +9,12 @@
 #################
 ### INIT PACE ###
 #################
-path_in          <- paste0(path_data,"PACE/SPEXone-L2-DL20250127/",gsub("-","",mydate),"/")
+#path_in          <- paste0(path_data,"PACE/SPEXone-L2-DL20250619/",gsub("-","",mydate),"/")
+path_in          <- paste0(path_spex,gsub("-","",mydate),"/")
 filenames        <- list.files(path=path_in, pattern="PACE_SPEXONE.*") # PACE_SPEXONE.20240618T215818.V2.L2.AER_OCEAN_REMOTAP.nc
-spex_vardataname <- c("geophysical_data/aot")
-spex_wavname     <- c("geophysical_data/wave_optic_prop")
-spex_qualityflag <- c("diagnostic_data/quality_flag")
+spex_vardataname <- "geophysical_data/aot"
+spex_wavname     <- "sensor_band_parameters/wavelength3d" # For deprecated version of SPEXone = "geophysical_data/wave_optic_prop"
+spex_qualityflag <- "diagnostic_data/quality_flag"
 
 ####################
 ### READ SPEXONE ###
@@ -31,8 +32,7 @@ for (f in 1:length(filenames)) { # length(filenames)
   spex_lat <- c(spex_lat, ncvar_get(file.nc, "geolocation_data/latitude"))
   temp_tim <- as.POSIXct(as.character(ncvar_get(file.nc,"geolocation_data/utc_date")), format="%Y%m%d", tz="UTC") + c(ncvar_get(file.nc,"geolocation_data/fracday")) * 86400
   spex_tim <- c(spex_tim, as.character(temp_tim))
-  spex_wav <- ncvar_get(file.nc, spex_wavname)
-  
+  #spex_wav <- ncvar_get(file.nc, spex_wavname) # TODO: 20250619, I cannot read it for the moment... selecting second wavelength that correspond to 355 based ncdump -v sensor_band_parameters/wavelength3d SPEXone_file
   ### SPEXone "orbit" lon and lat
   spex_orbit_lon <- c( spex_orbit_lon, apply(ncvar_get(file.nc, "geolocation_data/longitude"),2,mean) )
   spex_orbit_lat <- c( spex_orbit_lat, apply(ncvar_get(file.nc, "geolocation_data/latitude"),2,mean) )
@@ -56,14 +56,16 @@ for (f in 1:length(filenames)) { # length(filenames)
 }
 
 ### Clean
-ID <- which(!is.na(spex_vardata)[,which(spex_wav==355)])
+#ID <- which(!is.na(spex_vardata)[,which(spex_wav==355)]) # TODO: 20250619, I cannot read it for the moment... selecting second wavelength that correspond to 355 based ncdump -v sensor_band_parameters/wavelength3d SPEXone_file
+ID <- which(!is.na(spex_vardata)[,2])
 spex_lon <- spex_lon[ID]
 spex_lat <- spex_lat[ID]
 spex_tim <- spex_tim[ID]
 spex_tim <- as.POSIXct(spex_tim, tz="UTC")
 spex_vardata        <- spex_vardata[ID,]
 spex_vardata        <- data.frame(spex_vardata)
-names(spex_vardata) <- c(paste0("spex_AOD",spex_wav))
+#names(spex_vardata) <- c(paste0("spex_AOD",spex_wav)) # TODO: 20250619, I cannot read it for the moment... selecting second wavelength that correspond to 355 based ncdump -v sensor_band_parameters/wavelength3d SPEXone_file
+names(spex_vardata) <- c(paste0("spex_AOD355"))
 spex_geodata        <- data.frame(ID=1:length(spex_lon), lon=spex_lon, lat=spex_lat, tim=spex_tim)
 
 
