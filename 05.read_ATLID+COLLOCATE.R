@@ -70,6 +70,8 @@ atlid_vardata_sel <- atlid_vardata
 ### Initializing atlid geodata for all orbits
 atlid_geodata_all <- atlid_geodata
 
+#print(atlid_filename) ### DEBUG
+
 ############
 ### READ ### Reading atlid per product (p) and file orbit (f) for several variables (v) and doing the collocation with SPEXone
 ############
@@ -109,6 +111,7 @@ for (p in 1:length(atlid_product)) { # 1:length(atlid_product)
     latmax <- max(atlid_geodata[[p]]$lat)
     timmin <- min(atlid_geodata[[p]]$tim)
     timmax <- max(atlid_geodata[[p]]$tim)
+    #print(paste0("latmin=",latmin,", latmax=",latmax))
     ###
     spex_ID  <- which(
       spex_geodata$lon >= (lonmin + dist) & spex_geodata$lon <= (lonmax - dist) &

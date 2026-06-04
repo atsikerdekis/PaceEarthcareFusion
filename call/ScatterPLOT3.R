@@ -61,8 +61,10 @@ ScatterPLOT3 <- function(dataX, dataY, titleX="dataX", titleY="dataY", varname, 
     commonTheme +
     theme(axis.text=element_text(size=10, family="Century Gothic")) +
     theme(text=element_text(size=10, family="Century Gothic")) +
-    theme(legend.title=element_blank())
-  
+    theme(legend.title=element_blank()) +
+    theme(axis.title.x = element_text(color = "red")) +
+    theme(axis.title.y = element_text(color = "blue"))
+
   ### SHOW DENSITY
   if (show_density) { 
     p <- p + 

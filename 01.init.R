@@ -22,6 +22,9 @@ suppressMessages(suppressWarnings(library("oce")))
 suppressMessages(suppressWarnings(library("ocedata")))
 suppressMessages(suppressWarnings(library("fields")))
 suppressMessages(suppressWarnings(library("data.table")))
+suppressMessages(suppressWarnings(library("httr")))
+suppressMessages(suppressWarnings(library("rvest")))
+suppressMessages(suppressWarnings(library("lubridate")))
 suppressMessages(suppressWarnings(data("coastlineWorldFine")))
 
 ############
@@ -70,6 +73,4 @@ dpi <- 300
 #############
 ### FLAGS ###
 #############
-flag_plot_MSI <- FALSE
-flag_plot_OCI <- FALSE
 

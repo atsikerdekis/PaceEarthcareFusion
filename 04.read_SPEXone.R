@@ -39,19 +39,23 @@ for (f in 1:length(filenames)) { # length(filenames)
   
   ### Read AOD for all wavelengths
   temp_var <- ncvar_get(file.nc, spex_vardataname) # aot(bins_along_track, bins_across_track, number_of_bands_for_optic)
-  
+
+  ### Read Aerosol Layer Height (ALH)
+  spex_alh <- ncvar_get(file.nc, "geophysical_data/alh") # alh(bins_along_track, bins_across_track)
+
   ### Read Quality Flag
   spex_qf <- ncvar_get(file.nc, spex_qualityflag) # int quality_flag(bins_along_track, bins_across_track) 
   spex_qf[which(spex_qf != 0)]=NA                 # quality_flag:long_name = "Quality of retrieved pixels (0: good)" ;
   
   ### Apply Quality Flag
   for (w in 1:dim(temp_var)[1]) { temp_var[w,,] <- temp_var[w,,] + spex_qf }
-  
-  
+  spex_alh <- spex_alh + spex_qf
+
   dim(temp_var) <- c( dim(temp_var)[1], dim(temp_var)[2]*dim(temp_var)[3] )
   temp_var      <- aperm(temp_var, c(2,1))
-  spex_vardata  <- rbind(spex_vardata, temp_var)
-  
+  #spex_vardata  <- rbind(spex_vardata, temp_var)
+  spex_vardata  <- rbind( spex_vardata, cbind(temp_var, data.frame(c(spex_alh))) )
+
   nc_close(file.nc)
 }
 
@@ -65,7 +69,11 @@ spex_tim <- as.POSIXct(spex_tim, tz="UTC")
 spex_vardata        <- spex_vardata[ID,]
 spex_vardata        <- data.frame(spex_vardata)
 #names(spex_vardata) <- c(paste0("spex_AOD",spex_wav)) # TODO: 20250619, I cannot read it for the moment... selecting second wavelength that correspond to 355 based ncdump -v sensor_band_parameters/wavelength3d SPEXone_file
-names(spex_vardata) <- c(paste0("spex_AOD355"))
+#names(spex_vardata) <- c(paste0("spex_AOD355"))
+print(head(spex_vardata))
+spex_wav <- c(340, 355, 380, 440, 490, 500, 532, 550, 565, 670, 675, 765, 865, 870, 1020, 1064, 1600, 2000)
+names(spex_vardata) <- c(paste0("spex_AOD",spex_wav),"spex_ALH")
+print(head(spex_vardata))
 spex_geodata        <- data.frame(ID=1:length(spex_lon), lon=spex_lon, lat=spex_lat, tim=spex_tim)
 
 

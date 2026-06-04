@@ -21,7 +21,7 @@ DD   <- substr(input_date,7,9)
 input_stime <- as.POSIXct(paste0(input_date,"T",input_stime), format="%Y%m%dT%H%M%S", tz="UTC")
 input_etime <- as.POSIXct(paste0(input_date,"T",input_etime), format="%Y%m%dT%H%M%S", tz="UTC")
 input_mtime <- mean(c(input_stime, input_etime))
-path <- paste0("EarthCARE/EarthCAREL1Validated/MSI_RGR_1C/AF/",YYYY,"/",MM,"/",DD,"/")
+path <- paste0("EarthCARE/EarthCAREL1Validated/MSI_RGR_1C/BA/",YYYY,"/",MM,"/",DD,"/")
 
 #########################
 ### GET LIST OF FILES ###

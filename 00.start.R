@@ -17,10 +17,12 @@ rm(list=ls())
 #############
 dist  <- 0.2              # Spatial Distance for Collocation (degrees)
 tdif  <- 7200             # Temporal Difference for Collocation (seconds)
-sDate <- "2025-07-01"     # Start date
-eDate <- "2025-08-22"     # End date
+sDate <- "2025-01-05"     # Start date
+eDate <- "2025-01-05"     # End date
 atlid_product <- c("TC_","EBD") # Which ATLID products to analyze? Can be several at once: e.g. c("TC_","FM_","EBD","AER")
 atlid_version <- "EXBA" # Which ATLID version to use
+flag_plot_MSI <- TRUE
+flag_plot_OCI <- TRUE
 
 ####################
 ### INITITIALIZE ###
@@ -60,18 +62,21 @@ for (mydate in as.character(seqDate)) {
   message("### Download SPEXone")
   source("02.download_SPEXone.R")
   
-  ### Download EarthCARE
-  message("### Download ATLID")
-  source("03.download_ATLID.R")
-
   ### Check for data availability
   path_spex_date <- paste0(path_spex,gsub("-","",mydate),"/")
   if (dir.exists(path_spex_date)==TRUE)  { data_found <- TRUE }
   if (dir.exists(path_spex_date)==FALSE) { data_found <- FALSE }
 
   if (data_found==TRUE) {
+    ### Download EarthCARE -> Do this after checking for SPEXone data availability to avoid downloading ATLID
+    message("### Download ATLID")
+    #source("03.download_ATLID_no_filter_dl.R")
+    #source("03.download_ATLID_filter_dl.R")
+
     ### Read SPEXone
     source(paste0(path_code,"04.read_SPEXone.R"))
+
+    ### Read ATLID
     source(paste0(path_code,"05.read_ATLID+COLLOCATE.R"))
     ### If collocated data found plot
     if (length(col_geodata$EBD$origID1)==0) { message(paste0("No collocated data found between SPEXone and ATLID for ",mydate)) }

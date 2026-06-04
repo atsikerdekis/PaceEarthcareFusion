@@ -105,7 +105,7 @@ for (p in loop_product) {
         missingColor="#FFFFFF00")
     }
     
-    for (s in loop_orbit) {
+    for (s in 13) { # loop_orbit
       print_progress(i=s, N=length(orbit_ID), time_start=time_start, time_units="secs") # print progress
       
       ##########################
@@ -155,13 +155,14 @@ for (p in loop_product) {
         # TC=13 (Smoke)
         # TC=14 (Dust Smoke)
         # TC=15  (Dusty Mix)
-        # TC=25 (Stratospheric Ash)
+        # TC=21 NAT = Stratospheric (Nitric Acid Trihydrate) mixtures
+	# TC=25 (Stratospheric Ash)
         # TC=26 (Stratospheric Sulphate)
         # TC=27 (Stratospheric Smoke)
-        # TC=101
-        # TC=102
-        # TV=104
-        # TC=105
+        # TC=101 Unknown Aerosol 1
+        # TC=102 Unknown Aerosol 2
+        # TC=104 Unknown Str Aerosol1
+        # TC=105 Unknown Str Aerosol1
         atlid_TC_classification <- atlid_vardata_sel$TC_$`ScienceData/classification`[ID,]
         ID_class <- which(atlid_TC_classification != 10 &
                             #atlid_TC_classification != 1 & # Liquid Cloud (Warm) --> JUST FOR A TEST
@@ -203,11 +204,16 @@ for (p in loop_product) {
         atlid_PROF_z[which(atlid_PROF_z<0)]=NA
         # Remove extreme extinction values (very rare)
         atlid_PROF_z[which(atlid_PROF_z > 1)]=NA
+
+        ### Flip
+        atlid_TC_classification <- atlid_TC_classification[,dim(atlid_TC_classification)[2]:1]
+        atlid_TC_classification <- matrix(data=as.numeric(unlist(atlid_TC_classification)), nrow=dim(atlid_TC_classification)[1], ncol=dim(atlid_TC_classification)[2])
       }
       
-      ###
+      ### Flip
       atlid_PROF_z <- atlid_PROF_z[,dim(atlid_PROF_z)[2]:1]
       atlid_PROF_z <- matrix(data=as.numeric(unlist(atlid_PROF_z)), nrow=dim(atlid_PROF_z)[1], ncol=dim(atlid_PROF_z)[2])
+
       if (atlid_varname[[p]][v] == "ScienceData/aerosol_classification") {
         atlid_PROF_z[which(atlid_PROF_z==-2)]=1001
         atlid_PROF_z[which(atlid_PROF_z==-1)]=1002
@@ -247,6 +253,7 @@ for (p in loop_product) {
       }
       
       ### SPEXone
+      spex_plot_alh <- NULL
       spex_plot_z1 <- NULL
       spex_plot_z2 <- NULL
       spex_plot_origID2 <- NULL
@@ -258,8 +265,9 @@ for (p in loop_product) {
       for (i in atlid_geodata_sel[[p]]$atlid_ID[ID]) {
         N_col <- which(col_geodata[[p]]$origID1 == i & col_geodata[[p]]$orbit_ID == orbit_ID[s])
         if (length(N_col)==0) {
-          spex_plot_z1 <- c(spex_plot_z1, NA)
-          spex_plot_z2 <- c(spex_plot_z2, NA)  
+	  spex_plot_alh <- c(spex_plot_alh, NA)
+          spex_plot_z1  <- c(spex_plot_z1, NA)
+          spex_plot_z2  <- c(spex_plot_z2, NA)  
           spex_plot_origID2 <- c(spex_plot_origID2, NA) 
           spex_plot_LON2 <- c(spex_plot_LON2, NA) 
           spex_plot_LAT2 <- c(spex_plot_LAT2, NA) 
@@ -275,6 +283,7 @@ for (p in loop_product) {
           spex_plot_TIM2 <- c(spex_plot_TIM2, col_geodata[[p]]$TIM2[N_col])
           spex_plot_DIST <- c(spex_plot_DIST, col_geodata[[p]]$DIST[N_col])
           spex_plot_TDIF <- c(spex_plot_TDIF, col_geodata[[p]]$TDIF[N_col])
+	  spex_plot_alh <- c(spex_plot_alh, spex_vardata[ID_spex,"spex_ALH"])
           spex_plot_z1 <- c(spex_plot_z1, spex_vardata[ID_spex,"spex_AOD355"])
           spex_plot_z2 <- c(spex_plot_z2, get_AngstromExponent(aodW1=spex_vardata[ID_spex,"spex_AOD440"], aodW2=spex_vardata[ID_spex,"spex_AOD870"], wave1=440, wave2=870) )
         }
@@ -294,7 +303,8 @@ for (p in loop_product) {
         ATLID_AOD_from_EXT[which(is.na(spex_plot_z1))]=NA
         spex_plot_z1[which(is.na(ATLID_AOD_from_EXT))]=NA
 	atlid_PROF_z[which(is.na(spex_plot_z1)),]=NA
-	
+	spex_plot_alh[which(is.na(spex_plot_z1))]=NA
+
 	###
 	### FILTER AOD OUTLIERS: Several rules...
 	###
@@ -367,7 +377,8 @@ for (p in loop_product) {
         ATLID_AOD_from_EXT[c(ID_AOD_outlier1,ID_AOD_outlier2,ID_AOD_outlier3,ID_AOD_outlier4,ID_AOD_outlier5,ID_AOD_outlier6,ID_AOD_outlier7,ID_AOD_outlier8)]=NA
 
 	### PLOT  DATA TABLE TO EXPORT AND SCATTERPLOT
-        plot_data <- data.table(spex_AOD355 = spex_plot_z1,
+        plot_data <- data.table(spex_ALH = spex_plot_alh,
+				spex_AOD355 = spex_plot_z1,
                                 atlid_AOD355 = ATLID_AOD_from_EXT,
                                 spex_origID2 = spex_plot_origID2,
                                 spex_LON2 = spex_plot_LON2,
@@ -375,6 +386,102 @@ for (p in loop_product) {
                                 spex_TIM2 = spex_plot_TIM2,
                                 spex_DIST = spex_plot_DIST,
                                 spex_TDIF = spex_plot_TDIF)
+
+	# PERCENTAGE AOD PER SPECIES FOR plot_data
+        # TC=10 (Dust)
+        # TC=11 (Sea Salt)
+        # TC=12 (Continental Pollution)
+        # TC=13 (Smoke)
+        # TC=14 (Dust Smoke)
+        # TC=15  (Dusty Mix)
+        # TC=21 NAT = Stratospheric (Nitric Acid Trihydrate) mixtures
+        # TC=25 (Stratospheric Ash)
+        # TC=26 (Stratospheric Sulphate)
+        # TC=27 (Stratospheric Smoke)
+	# TC=101 Unknown Aerosol 1
+        # TC=102 Unknown Aerosol 2
+        # TC=104 Unknown Str Aerosol1
+        # TC=105 Unknown Str Aerosol1
+	aerosol_TC <- c(10,11,12,13,14,15,21,25,26,27,101,102,104,105)
+        for (aero_TC in 1:length(aerosol_TC)) {
+          atlid_PROF_z_filtered <- atlid_PROF_z
+          atlid_PROF_z_filtered[atlid_TC_classification != aerosol_TC[aero_TC]] <- NA
+          #image(atlid_PROF_z_filtered, col="red")
+          ATLID_AOD_from_EXT_species     <- rep(NA, dim(atlid_PROF_z_filtered)[1])
+          ATLID_AOD_from_EXT_species     <- rowSums(atlid_PROF_z_filtered,na.rm=T)
+          ATLID_AOD_from_EXT_species_per <- 100*(ATLID_AOD_from_EXT_species/ATLID_AOD_from_EXT)
+          #message(max(ATLID_AOD_from_EXT_species_per,na.rm=T))
+          set(
+            plot_data,
+            j = paste0("atlid_species_per_", aerosol_TC[aero_TC]),
+            value = ATLID_AOD_from_EXT_species_per
+          )
+        }
+
+	### AEROSOL LAYER HEIGHT TROPOSPHERIC AEROSOL
+        ### AEROSOL LAYER HEIGHT STRATOSPHERIC AEROSOL
+        ### AEROSOL LAYER HEIGHT BY SPECIES
+        ### Calculation is done by weighting with extinction
+        ### Tropospheric and stratospheric have to be calculated here
+        ### not by combining species later on...
+        aerosol_TC <- c(10,11,12,13,14,15,25,26,27,101,102,104,105,1000,2000)
+        for (aero_TC in 1:length(aerosol_TC)) {
+          if (aerosol_TC[aero_TC] < 1000) {
+            atlid_PROF_z_filtered <- atlid_PROF_z
+            atlid_PROF_z_filtered[atlid_TC_classification != aerosol_TC[aero_TC]] <- NA
+            atlid_PROF_y_filtered <- atlid_PROF_y
+            atlid_PROF_y_filtered[atlid_TC_classification != aerosol_TC[aero_TC]] <- NA
+          }
+          # TROPOSPHERIC AEROSOL
+          if (aerosol_TC[aero_TC] == 1000) {
+            atlid_PROF_z_filtered <- atlid_PROF_z
+            atlid_PROF_z_filtered[atlid_TC_classification != 10 & atlid_TC_classification != 11 & atlid_TC_classification != 12  & atlid_TC_classification != 13 &
+                                  atlid_TC_classification != 14 & atlid_TC_classification != 15 & atlid_TC_classification != 101 & atlid_TC_classification != 102]  <- NA
+            atlid_PROF_y_filtered <- atlid_PROF_y
+            atlid_PROF_y_filtered[atlid_TC_classification != 10 & atlid_TC_classification != 11 & atlid_TC_classification != 12  & atlid_TC_classification != 13 &
+                                  atlid_TC_classification != 14 & atlid_TC_classification != 15 & atlid_TC_classification != 101 & atlid_TC_classification != 102]  <- NA
+          }
+          # STRATOSPHERIC AEROSOL
+          if (aerosol_TC[aero_TC] == 2000) {
+            atlid_PROF_z_filtered <- atlid_PROF_z
+            atlid_PROF_z_filtered[atlid_TC_classification != 25 & atlid_TC_classification != 26 & atlid_TC_classification != 27  & atlid_TC_classification != 104 & atlid_TC_classification != 105]  <- NA
+            atlid_PROF_y_filtered <- atlid_PROF_y
+            atlid_PROF_y_filtered[atlid_TC_classification != 25 & atlid_TC_classification != 26 & atlid_TC_classification != 27  & atlid_TC_classification != 104 & atlid_TC_classification != 105]  <- NA
+          }
+          # Remove all cases above 10km for tropospheric
+          if (aerosol_TC[aero_TC]==10 | aerosol_TC[aero_TC]==11 | aerosol_TC[aero_TC]==12  | aerosol_TC[aero_TC]==13 |
+              aerosol_TC[aero_TC]==14 | aerosol_TC[aero_TC]==15 | aerosol_TC[aero_TC]==101 | aerosol_TC[aero_TC]==102 |
+              aerosol_TC[aero_TC]==1000) {
+            atlid_PROF_z_filtered[which(atlid_PROF_y_filtered > 10)] <- NA
+          }
+          aerosol_layer_height_filtered <- NULL
+          for (x_pixel in 1:dim(atlid_PROF_z_filtered)[1]) {
+            EXT_weights <- atlid_PROF_z_filtered[x_pixel,] / sum(atlid_PROF_z_filtered[x_pixel,], na.rm = TRUE)
+            aerosol_layer_height_filtered <- c(aerosol_layer_height_filtered, sum(atlid_PROF_y_filtered[x_pixel,] * EXT_weights, na.rm=T))
+            #aerosol_layer_height_filtered[which(aerosol_layer_height_filtered==0)]=NA Don't do that because later on you are removing all NA line in plot_data
+          }
+          ### Store Tropospheric and Stratospheric layer heights in a different variable to plot in profile
+          if (aerosol_TC[aero_TC] == 1000) {
+            atlid_tropospheric_ALH <- aerosol_layer_height_filtered
+            atlid_tropospheric_ALH[which(atlid_tropospheric_ALH==0)]=NA
+          }
+          if (aerosol_TC[aero_TC] == 2000) {
+            atlid_stratospheric_ALH <- aerosol_layer_height_filtered
+            atlid_stratospheric_ALH[which(atlid_stratospheric_ALH==0)]=NA
+          }
+          #x <- matrix(data=rep(atlid_PROF_x,dim_y),nrow=dim_x,ncol=dim_y)
+          #y <- atlid_PROF_y
+          #z <- atlid_PROF_z_filtered
+          #poly.image(x=x, y=y, z=z)
+          #points(atlid_PROF_x, aerosol_layer_height_filtered)
+          set(
+            plot_data,
+            j = paste0("atlid_species_ALH_", aerosol_TC[aero_TC]),
+            value = aerosol_layer_height_filtered
+          )
+        }
+
+	### RBIND TO plot_data_all
         plot_data <- plot_data[, lapply(.SD, mean, na.rm = TRUE), by = spex_origID2]
         plot_data <- na.omit(plot_data)
         plot_data_all <- rbind(plot_data_all, plot_data)
@@ -471,6 +578,15 @@ for (p in loop_product) {
       mapGrid(longitude=seq(-180,180,5), latitude=seq(-90,90,5), lwd=0.5)
       mapPoints(spex_geodata$lon, spex_geodata$lat, cex=0.1, col="orange", pch=3)
       mapPoints(atlid_geodata_all[[p]]$lon, atlid_geodata_all[[p]]$lat, col="#00BFFF", pch=19, cex=0.1)
+
+
+ ### TEST
+      atlid_coord <- read.table(paste0("/nobackup/users/tsikerde/AIRSENSE/PEF/data/ATLID/Coordinates/Coordinates_EarthCARE_",YYYY,MM,DD,".csv"), sep=",", head=T)
+      spex_coord  <- read.table(paste0("/nobackup/users/tsikerde/AIRSENSE/PEF/data/ATLID/Coordinates/Coordinates_PACE_",YYYY,MM,DD,".csv"), sep=",", head=T)
+      mapPoints(atlid_coord$Longitude, atlid_coord$Latitude, col="#00BFFF", pch=19, cex=0.4)
+      mapPoints(spex_coord$Longitude, spex_coord$Latitude, col="orange", pch=19, cex=0.4)
+ ###
+
       mapPolygon(longitude=c(lonmin,lonmin,lonmax,lonmax,lonmin), latitude=c(latmin,latmax,latmax,latmin,latmin), border="red", lwd=2)
       box(lwd=2, col="grey")
       
@@ -523,8 +639,18 @@ for (p in loop_product) {
       abline(h=seq(0,40,5), lwd=0.5, col="grey")
       title(ylab="ATLID Altitude (km)", line=4, cex.lab=2.2)
       box(lwd=2, col="grey")
-      ### Extinction? Then display the percentage of extinction per 5km
+      ### Extinction? Then display the percentage of extinction per 5km and Tropospheric ALH
       if ( grepl("particle_extinction_coefficient", atlid_varname[[p]][v]) ) {
+        ### SPEX ALH tropospheric
+        points(plot_data$spex_LON2, plot_data$spex_ALH, cex=4.0, pch="-", col="black")
+        points(plot_data$spex_LON2, plot_data$spex_ALH, cex=3.5, pch="-", col="#FFF58A")
+	### ATLID ALH tropospheric
+        points(atlid_PROF_x, atlid_tropospheric_ALH, cex=3.0, pch="-", col="black")
+        points(atlid_PROF_x, atlid_tropospheric_ALH, cex=2.5, pch="-", col="cyan")
+        ### ATLID ALH stratospheric
+        points(atlid_PROF_x, atlid_stratospheric_ALH, cex=3.0, pch="-", col="black")
+        points(atlid_PROF_x, atlid_stratospheric_ALH, cex=2.5, pch="-", col="cyan")
+        ### Percentage every 5 km
         x_percentage <- atlid_PROF_x[1] - abs(atlid_PROF_x[1]-atlid_PROF_x[length(atlid_PROF_x)])*0.02
         points(x=x_percentage, y=2.5, col="black", pch=15, cex=10)
         points(x=x_percentage, y=7.5, col="black", pch=15, cex=10)
@@ -657,7 +783,7 @@ for (p in loop_product) {
       points(col_data$LON1, col_data$LAT1, col="blue", xlim=c(117,118), ylim=c(-7,-12), cex=1.5, pch=19, cex.axis=1.5, las=1)
       points(col_data$LON2, col_data$LAT2, col="red", cex=1.5, pch=19)
       points(spex_geodata$lon, spex_geodata$lat, cex=1, col="orange", pch=3)
-      for (n in 1:length(col_data$LON1)) { lines(x=c(col_data$LON1[n],col_data$LON2[n]), y=c(col_data$LAT1[n],col_data$LAT2[n]), lwd=0.3, col="yellow") }
+      for (n in 1:length(col_data$LON1)) { lines(x=c(col_data$LON1[n],col_data$LON2[n]), y=c(col_data$LAT1[n],col_data$LAT2[n]), lwd=0.3, col="red") }
       points(atlid_geodata_all[[p]]$lon, atlid_geodata_all[[p]]$lat, col="#00BFFF", pch=19, cex=0.5)
       abline(v=seq(-180,180,dist),col="grey",lwd=0.5)
       abline(h=seq(-90,90,dist),col="grey",lwd=0.5)
@@ -677,6 +803,7 @@ for (p in loop_product) {
 #######################################################
 write.table( x=plot_data_all, file=paste0(path_plot,gsub("-","",mydate),"/PLOT_DATA.txt"), quote=F, row.names=F, sep=";")
 ymax   <- 1
+source(paste0(path_call,"ScatterPLOT3.R"))
 myplot <- ScatterPLOT3(dataX=plot_data_all$spex_AOD355, dataY=plot_data_all$atlid_AOD355, titleX=bquote(SPEXone~AOD[355]), titleY=bquote(ATLID~AOD[355]), smin=0, smax=ymax+ymax*0.1, psize=4)
 ggsave(plot=myplot, width=6, height=6, dpi=dpi, filename=paste0(path_plot,gsub("-","",mydate),"/PLOT_DATA.png") )
 
