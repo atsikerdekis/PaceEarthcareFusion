@@ -42,11 +42,7 @@ Run the script:
 ## 🌋 ATLID-only Profiler
 
 Need EarthCARE/ATLID profiles for a specific longitude, latitude and date
-(e.g. to check a volcanic plume) without any PACE/SPEXone comparison? See the
-standalone [`ATLID_Profiler/`](ATLID_Profiler/README.md) tool:
-
-```
-cd ATLID_Profiler
-Rscript start.R 167.84 -15.39 20260307 20260317
-```
+(e.g. to check a volcanic plume) without any PACE/SPEXone comparison? This has
+been extracted into its own standalone repository:
+🔗 [ATLID_Profiler](https://github.com/atsikerdekis/ATLID_Profiler)
 
