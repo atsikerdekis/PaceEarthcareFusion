@@ -1,0 +1,13 @@
+name: ATLID_Profiler
+channels:
+  - conda-forge
+dependencies:
+  - r-base
+  - r-ncdf4
+  - r-oce
+  - r-ocedata
+  - r-fields
+  - python
+  - wget
+  - ca-certificates
+  - openssl
