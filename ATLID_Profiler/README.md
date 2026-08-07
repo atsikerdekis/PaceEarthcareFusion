@@ -93,3 +93,7 @@ closest approach) for every matching orbit/day under `output/`.
 
 - Originally derived from [PACE EarthCARE Fusion (PEF)](https://github.com/atsikerdekis/PaceEarthcareFusion)
 - Data attribution for EarthCARE (ATLID): [van Zadelhoff et al. (2023)](https://doi.org/10.5194/amt-16-3631-2023) and [Donovan et al. (2024)](https://doi.org/10.5194/amt-17-5301-2024)
+
+## 📄 License
+
+Released under the [MIT License](LICENSE).
