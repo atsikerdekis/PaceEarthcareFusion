@@ -14,9 +14,10 @@ read_atlid_granule <- function(filepath, varnames) {
   h5_path <- filepath
   unzipped <- FALSE
 
-  if (grepl("\\.ZIP$", filepath, ignore.case = TRUE)) {
-    unzip(zipfile = filepath, exdir = path_temp)
-    h5_path <- file.path(path_temp, gsub("\\.ZIP$", ".h5", basename(filepath), ignore.case = TRUE))
+  if (grepl("\\.zip$", filepath, ignore.case = TRUE)) {
+    extracted <- unzip(zipfile = filepath, exdir = path_temp)
+    h5_path <- extracted[grepl("\\.h5$", extracted, ignore.case = TRUE)][1]
+    if (is.na(h5_path)) stop("No .h5 file found inside archive: ", filepath)
     unzipped <- TRUE
   }
 

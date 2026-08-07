@@ -23,7 +23,7 @@ download_atlid_product <- function(date, product_key) {
 
   cmd <- paste0(
     shQuote(path_oads_python), " ", shQuote(path_oads_script), " ",
-    product$code, ":", substr(atlid_version, 3, 4),
+    product$code, ":", atlid_version_suffix,
     " -st ", st, " -et ", et,
     " --no_unzip -o ", shQuote(out_dir)
   )

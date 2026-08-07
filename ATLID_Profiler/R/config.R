@@ -25,6 +25,11 @@ path_oads_script <- Sys.getenv("ATLID_OADS_SCRIPT", file.path(path_base, "..", "
 ### ATLID DATA PRODUCT ###
 ##########################
 atlid_version <- Sys.getenv("ATLID_VERSION", "EXBA") # Baseline/version of ATLID products to request, e.g. "EXAG", "EXBA"
+if (!grepl("^[A-Z]{4}$", atlid_version)) {
+  stop("atlid_version ('", atlid_version, "') must be a 4-letter ATLID baseline code, e.g. 'EXAG' or 'EXBA'.")
+}
+### The 2-letter baseline suffix expected by the OADS downloader (e.g. 'BA' from 'EXBA')
+atlid_version_suffix <- substr(atlid_version, 3, 4)
 
 ### Product codes as used by the OADS downloader / ESA file naming convention
 atlid_products <- list(

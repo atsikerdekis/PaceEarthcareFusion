@@ -54,8 +54,13 @@ process_extinction_profile <- function(ebd_vars, tc_vars, idx) {
   cloud_rows <- which(apply(classification, 1, function(row) any(row %in% liquid_cloud_tc_codes)))
   if (length(cloud_rows) > 0) extinction[cloud_rows, ] <- NA
 
-  ### Extinction (m^-1) -> unitless optical depth per layer, using layer thickness (m)
-  layer_thickness <- cbind(height[, 1] + 496, height[, seq_len(n_levels - 1)]) - height
+  ### Extinction (m^-1) -> unitless optical depth per layer, using layer thickness (m).
+  ### The top-of-atmosphere boundary for the first (highest) level has no upper
+  ### neighbour, so its thickness is approximated using the nominal ATLID
+  ### medium-resolution vertical sampling of 496 m at the top of the profile
+  ### (same convention as the original 06.plot_profiles.R / 05.read_ATLID+COLLOCATE.R).
+  top_of_atmosphere_bin_m <- 496
+  layer_thickness <- cbind(height[, 1] + top_of_atmosphere_bin_m, height[, seq_len(n_levels - 1)]) - height
   extinction <- extinction * layer_thickness
   extinction[extinction < 0] <- NA  # Negative optical depth is unphysical
   extinction[extinction > 1] <- NA  # Extreme-value guard (rare artefacts)
