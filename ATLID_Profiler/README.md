@@ -4,9 +4,10 @@ A lightweight, standalone tool to quickly inspect **EarthCARE/ATLID** curtain
 profiles for any longitude/latitude/date of interest — e.g. to check on a
 volcanic plume, dust outbreak, or wildfire smoke within minutes.
 
-It is derived from the [PACE EarthCARE Fusion (PEF)](../README.md) comparison
-codebase, but **PACE/SPEXone is not used at all**. Only ATLID Level-2a
-products are downloaded and processed.
+It was originally derived from the [PACE EarthCARE Fusion (PEF)](https://github.com/atsikerdekis/PaceEarthcareFusion)
+comparison codebase, but **PACE/SPEXone is not used at all** and this tool has
+no runtime dependency on that repository. Only ATLID Level-2a products are
+downloaded and processed.
 
 For each requested day, the tool:
 1. Downloads the ATLID **EBD** (Extinction, Backscatter, Depolarization) and
@@ -90,5 +91,5 @@ closest approach) for every matching orbit/day under `output/`.
 
 ## 📜 Attribution
 
-- Derived from [PACE EarthCARE Fusion (PEF)](https://github.com/atsikerdekis/PaceEarthcareFusion)
+- Originally derived from [PACE EarthCARE Fusion (PEF)](https://github.com/atsikerdekis/PaceEarthcareFusion)
 - Data attribution for EarthCARE (ATLID): [van Zadelhoff et al. (2023)](https://doi.org/10.5194/amt-16-3631-2023) and [Donovan et al. (2024)](https://doi.org/10.5194/amt-17-5301-2024)
