@@ -39,4 +39,10 @@ Modify the following paths before running the code:
 Run the script:  
 `Rscript 00.start.R` 
 
+## 🌋 ATLID-only Profiler
+
+Need EarthCARE/ATLID profiles for a specific longitude, latitude and date
+(e.g. to check a volcanic plume) without any PACE/SPEXone comparison? This has
+been extracted into its own standalone repository:
+🔗 [ATLID_Profiler](https://github.com/atsikerdekis/ATLID_Profiler)
 
